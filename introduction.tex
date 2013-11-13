@@ -1,0 +1,180 @@
+
+The last decade has seen a priority shift for processor companies. If clock frequency
+was once the main metric for performance, today computing power is measured in number of
+cores in a single chip.
+For software developers and computer scientists, once focused in developing sequential programs,
+newer hardware usually meant faster programs without any change to the source code. Today,
+the free lunch is over. Multicore processors are now forcing the development of
+new software methodologies that take advantage of increasing processing power through parallelism.
+However, parallel programming is difficult, usually because programs are written
+in imperative and stateful programming languages that make use of low level synchronization
+primitives such as locks, mutexes and barriers. This tends to make the task of managing multithreaded
+execution quite intricate and error-prone, resulting in race hazards and deadlocks.
+In the future, \emph{many-core} processors will make this task look even more daunting.
+
+Advances in network speed and bandwidth are making distributed computing
+more appealing. For instance, \emph{cloud computing} is a new emerging paradigm that wants
+to make every computer connected to the Internet as a client of a pool of computing power,
+where data can be retrieved and computation performed. From the perspective of high performance
+computing, the \emph{computer cluster} is a well established paradigm that uses fast local area
+networks to improve performance and solve problems that would take a long time with a single computer.
+
+Developments in parallel and distributed programming have given birth to several programming models.
+At the end of the spectrum are lower-level programming abstractions such as
+\emph{message passing} (e.g., MPI~\cite{gabriel04-open-mpi}) and \emph{shared memory}
+(e.g., Pthreads or OpenMP~\cite{Chapman-2007-UOP-1370966}).
+While such abstractions are very expressive and enable the programmer to write very performant code,
+they tend to be very hard to use and debug and it is difficult to prove correctness.
+On the other hand, we have many declarative programming models
+that can be run in parallel~\cite{Blelloch:1996:PPA:227234.227246} and tend to be easier to reason about.
+While those declarative paradigms tend to make programs easier to reason about, they also offer little
+control to the programmer which may result in suboptimal performance.
+
+In the context of the Claytronics project~\cite{goldstein-computer05}, Ashley-Rollman et al~\cite{ashley-rollman-iclp09, ashley-rollman-derosa-iros07wksp} have created
+Meld, a logic programming language suited to program massively distributed systems made of modular robots
+with a dynamic topology. The distribution of computation is done by first partitioning the program
+state across the robots and then making the computation local to the node. Because Meld programs
+are sets of logical clauses, they are more amenable to proof. Meld, however, gives very little control
+to the programmer since it is heavily declarative.
+
+In this proposal, we present a new programming language called \lang (Linear Meld)
+that retains the declarative aspect of the original Meld but also adds programmer
+control through \emph{coordination}. We intend to use \lang to efficiently run graph-based
+algorithms on multicore machines. To this purpose, instead of seeing the distributed system
+as a network of robots, we see a \lang program as a graph data structure,
+with several cores working on sets of nodes of the graph. We think \lang is also suitable
+to prove properties about programs such as correctness and termination.
+
+\section{Thesis Statement}
+
+We argue that \lang is a suitable declarative programming language to develop parallel programs.
+Not only are \lang programs reasonably scalable by default, but the programmer is allowed to write
+coordination code improve their execution time or scalability. These coordination
+directives change how the runtime system schedules computation and can be written with the same
+facilities used to write standard program code. Finally, we want to show that the logical foundations
+of \lang can be leveraged to make program execution competitive when compared to implementations
+in other declarative languages.
+
+\lang will accomplish these goals using four main ideas:
+
+
+\begin{itemize}
+   \item Implicit Parallelism (done)
+   
+   We horizontally divide the logical facts across all the nodes of the graph. Since the
+   logical rules only make use of data local to a node, computation can be performed at the
+   node level, disregarding the remaining nodes of the graph. Therefore, processing units
+   may perform work on a subgraph, while other processing units work elsewhere, creating
+   parallelism.
+
+   \item Linear Logic (done)
+
+   We integrated linear logic~\cite{Girard95logic:its} into our language, so that program state
+   can be encoded naturally. The original Meld was fully classical where everything that
+   is derived is true forever. Linear logic turns some facts into resources that will be consumed when a rule is applied. We can leverage this sound logical foundation to prove many properties about our programs, including correctness and termination. To the best of our knowledge, \lang is the first
+   linear logic based language that attempts to solve real world problems.
+
+   \item Coordination (partly done)
+   
+   We are using the concept of \emph{action facts} to coordinate the execution of programs.
+   We can increase the priority of certain nodes during runtime according to the state of the
+   computation and to the state of the runtime so that programs can run faster.
+   For example, consider the shortest path program. We can pick nodes with shorter
+   distances to the source node before other nodes, so that convergence is reached faster.
+   We also use action facts to model output and to visualize the program's behavior in the interfaces that we built. We intend to add more coordination directives and action facts and also write more
+   programs that use coordination.
+
+   \item Implementation (partly done)
+
+   We have implemented a new compiler and a virtual machine prototype from scratch that executes on multicore machines
+   \footnote{Source code is available at \url{http://github.com/flavioc/meld} and \url{http://github.com/flavioc/cl-meld}.}.
+   Several interesting programs were implemented such as belief propagation~\cite{Gonzalez+al:aistats09paraml},
+   belief propagation with residual splash~\cite{Gonzalez+al:aistats09paraml}, PageRank, graph coloring,
+   N queens, shortest path~\cite{Dijkstra}, diameter estimation, map reduce, game of life, quick-sort, neural network training, among others. Our results show that \lang makes programs scalable, although it falls short when compared against other systems in absolute run time. We propose more optimization work
+   in order to make \lang more competitive against other systems. We want to leverage the sound logical
+   foundations of our language to optimize the compiler and runtime system.
+   
+\end{itemize}
+
+\section{Related Work}
+
+\subsection{Declarative Programming}
+
+Many programming models have been developed in order to make parallel programs both easier to write and reason about. The most famous examples of such paradigms are \emph{logic programming} and \emph{functional programming}.
+In logic languages such as Prolog, researchers took advantage of the non-determinism of proof-search to evaluate subgoals
+in parallel with models such as \emph{or-parallelism}~\cite{ali-86} and \emph{and-parallelism}~\cite{Shen-92}.
+In functional languages, the stateless nature of computation allows multiple expressions to evaluate safely in parallel.
+This has been explored in several languages such as NESL~\cite{Blelloch:1996:PPA:227234.227246} or Id~\cite{Nikhil93anoverview}. The ideas presented in NESL were implemented in modern languages such as Haskell~\cite{Chakravarty07dataparallel}.
+
+Recently, there has been an increasing interest in declarative and data-centric languages.
+MapReduce~\cite{Dean:2008:MSD:1327452.1327492}, for instance, is a popular data-centric programming
+model that is optimized for large clusters. The scheduling and data sharing model is very simple:
+in the \emph{map phase}, data is transformed at each node and the result reduced to a final
+result in the \emph{reduce phase}.
+
+A declarative approach that is regaining popularity is Datalog~\cite{Ullman:1990:PDK:533142}, a
+bottom-up logic programming language.
+Traditionally used in deductive databases, Datalog is being increasingly used in different fields
+such as distributed networking~\cite{Loo-condie-garofalakis-p2}, sensor
+nets~\cite{Chu:2007:DID:1322263.1322281} and cloud computing~\cite{alvaro:boom}.
+
+\subsection{Graph-Based Programming Models}
+
+Like \lang, many programming systems also model the program as a graph where computation will be performed.
+The Dryad system~\cite{Isard:2007:DDD:1272996.1273005} combines computational vertices
+with communication channels (edges) to form a data-flow graph. The program is scheduled to
+run on multiple computers or cores and data is partitioned during runtime. Routines that run on computational vertices
+are sequential, with no locking required.
+
+The Pregel system~\cite{Malewicz:2010:PSL:1807167.1807184} is also graph based, although programs have a more strict
+structure. They must be represented as a sequence of iterations where each iteration is composed of computation and message passing.
+Pregel is specially suited to solve very big graphs
+and to scale to large architectures.
+
+GraphLab~\cite{GraphLab2010} is a C++ framework for developing parallel machine learning
+algorithms. While Pregel uses message passing, GraphLab allows nodes to have read/write
+access to different scopes through different concurrent access models in order to balance
+performance and data consistency. While some programs only need to access the local node's
+data, others may need to update edge information. Each consistency model will provide different
+guarantees that are better adapted to some algorithms. GraphLab also provides different
+schedulers that dictate the order in which node's are computed. Later in this paper, we will
+show how certain GraphLab's schedulers can be easily implemented in \lang through the use of
+coordination facts.
+
+\subsection{Linear Logic}
+
+Linear logic is a substructural logic proposed by Jean-Yves Girard~\cite{Girard95logic:its} that extends intuitionistic logic with the concept of \emph{truth as resources}. Instead of seeing the truth as immutable, truth is now something that can be consumed during the proof process.
+
+Since computer science is focused on processes and algorithms, linear logic has been used
+in many areas of computing such as programming languages, game semantics, concurrent programming, knowledge representation, etc.
+Due to the resource interpretation of the logic, linear logic is good basis for programming
+languages that are interested in allowing state manipulation such as \lang .
+
+\subsection{Provability}
+
+Many techniques and formal systems have been devised to help reason about parallel programs.
+
+One example is the Owicki-Gries~\cite{Owicki:1976:VPP:360051.360224} deductive system
+for proving properties about imperative parallel programs (deadlock detection, termination, etc).
+It extends Hoare logic with a stronger set axioms such as parallel execution, critical section
+and auxiliary variables. The formal system can be successfully used in small imperative
+programs, although using it on languages such as C is difficult since they do not
+restrict the use of shared variables.
+
+Some formal systems do not build on top of a known programming paradigm, but instead
+create an entirely new formal system for describing concurrent systems. Process calculus
+such as $\pi$-calculus~\cite{Milner:1999:CMS:329902} are good examples of this.
+The $\pi$-calculus describes the interactions between processes
+that use channels for communication. Interestingly, channels can also be transmitted as
+messages, allowing for changes in the network of processes.
+Given two processes, the $\pi$-calculus is able to prove that they behave the same through
+the use of bisimulation equivalence.
+
+Another interesting model is Mobile UNITY~\cite{Roman97anintroduction}. The basic UNITY~\cite{UNITY} model assumed that statements could be executed non-deterministically
+in order to create parallelism. It then used this principle to prove properties about
+the system.
+Mobile UNITY transforms UNITY by adding locations to processes and removing the
+nondeterministic aspect from local processes. Processes could then communicate or move
+between locations. Because \lang also uses locations (as nodes),
+we believe that it may be possible to express \lang programs in Mobile UNITY but
+we haven't look deeply into it.

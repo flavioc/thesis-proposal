@@ -26,12 +26,22 @@
 \usepackage{times}
 \usepackage{fullpage}
 \usepackage{graphicx}
+
 \usepackage{amsmath}
+\usepackage{url}
+\usepackage{fancyvrb}
+\usepackage{verbatim}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{multirow}
+\usepackage{floatrow}
+\usepackage{proof-dashed}
 \usepackage[numbers,sort]{natbib}
 \usepackage[backref,pageanchor=true,plainpages=false, pdfpagelabels, bookmarks,bookmarksnumbered,
 %pdfborder=0 0 0,  %removes outlines around hyper links in online display
 ]{hyperref}
-\usepackage{subfigure}
+\graphicspath{{./figures/}{./benchmarks/data/}{./benchmarks/}}
+\input{fp-macros}
 
 % Approximately 1" margins, more space on binding side
 %\usepackage[letterpaper,twoside,vscale=.8,hscale=.75,nomarginpar]{geometry}
@@ -48,16 +58,16 @@
 \pagestyle{empty}
 
 \title{{\it \huge Thesis Proposal}\\
-{\bf Awesome Work in Computer Science}}
+{\bf Linear Logic and Coordination for Parallel Programming}}
 \author{Flavio Manuel Fernandes Cruz}
 \date{January 2014}
 \Year{2014}
 \trnumber{}
 
 \committee{
-Nearly Divine Personage, Chair \\
-Someone else \\
-Yet another person \\
+Frank Pfenning\\
+Seth Goldstein\\
+Ricardo Rocha\\
 Someone from a strange and faraway land
 }
 
@@ -67,7 +77,7 @@ Someone from a strange and faraway land
 % copyright notice generated automatically from Year and author.
 % permission added if \permission{} given.
 
-\keywords{Stuff, More Stuff}
+\keywords{linear logic, parallel programming, logic programming}
 
 \maketitle
 
@@ -113,16 +123,28 @@ Someone from a strange and faraway land
 % Other than that, just make it look good...
 
 
-\chapter{Introduction}
-\section{Parallel Programming}
-\section{Linear Logic}
+\newcommand{\lang}[0]{LM }
 
-\chapter{Soundness}
+\chapter{Introduction}
+\input{introduction}
+
+\chapter{Linear Meld}
+\input{language}
+
 \chapter{Coordination}
-\chapter{Current Implementation}
-\chapter{Planned Work}
-\section{Schedule}
-\chapter{Conclusion}
+\input{coordination}
+
+\chapter{Proof Theoretic Semantics}
+\input{proofs}
+
+\chapter{Implementation}
+\input{implementation}
+
+\chapter{Preliminary Experimental Results}\label{chapter:exp}
+\input{experiments}
+
+\chapter{Road Map}
+\input{roadmap}
 
 \appendix
 %\include{appendix}
@@ -137,6 +159,6 @@ Someone from a strange and faraway land
 %\newcommand{\bibpreamble}{This text goes between the ``Bibliography''
 %  header and the actual list of references}
 \bibliographystyle{plainnat}
-\bibliography{register} %your bib file
+\bibliography{refs} %your bib file
 
 \end{document}

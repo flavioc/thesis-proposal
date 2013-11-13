@@ -1,0 +1,545 @@
+
+Linear Meld (\lang) is a \emph{forward chaining} logic programming language in the style of Datalog~\cite{Ullman:1990:PDK:533142}. The program is defined as a \emph{database of facts} and a set of \emph{derivation rules}.
+Initially, we populate the database with the program's axioms and then determine which derivation rules can be applied by using the current database. Once a rule is applied, we derive new facts, which are then added to the database.
+If the rule uses linear facts, they are deleted from the database.
+The program stops when we reach \emph{quiescence}, that is, when we can no longer
+apply derivation rules.
+
+The database of facts can be seen as a graph data structure where each node contains a
+fraction of the database.
+Because the derivation rules can only manipulate facts belonging to
+a node, we are able to perform independent rule derivations at the node level, thus
+creating concurrency in the program.
+
+\section{A taste of \lang}
+
+In Fig.~\ref{code:visit} we present a complete \lang program that performs a visit of all nodes
+in a graph, starting at node $@1$. We first declare all the predicates (lines 1-4), which represent the kinds of facts we are going to use. Note that non \texttt{linear} predicates are classified as persistent so the \texttt{edge} predicate is persistent while everything else
+is linear.
+Next, we declare our program rules (lines 8-11), followed by the program axioms (lines 15-18).
+Node $@1$ starts with the \texttt{visit(@1)} fact.
+
+\begin{figure}[h!]
+\small\begin{Verbatim}[numbers=left]
+type route edge(node, node).
+type linear visit(node).
+type linear unvisited(node).
+type linear visited(node).
+
+// the program rules
+
+visit(A), unvisited(A) -o
+   visited(A), {B | !edge(A, B) | visit(B)}.
+
+visit(A), visited(A) -o visited(A).
+
+// axioms: the input data
+
+!edge(@1, @2). !edge(@2, @3). !edge(@1, @4). !edge(@2, @4).
+unvisited(@1). unvisited(@2). unvisited(@3). unvisited(@4).
+
+visit(@1).
+\end{Verbatim}
+  \caption{Visit program.}
+  \label{code:visit}
+\end{figure}
+\normalsize
+
+The first rule of the program (lines 8-9) is fired if the node has a \texttt{visit} and a \texttt{unvisited} fact. When fired, we first derive \texttt{visited} to mark node as "visited" and use a
+\emph{comprehension} to go through all the edge facts and derive \texttt{visit} for every one of them.
+This forces those nodes to be visited also. The second rule (line 11) is fired when the node is already
+visited more than once: we keep the \texttt{visited} fact and delete \texttt{visit}.
+
+Fig.~\ref{fig:exec_trace} shows a possible execution trace for the visit program.
+The database is represented as a graph structure where the edges represent the \texttt{edge}
+axioms. We also use the first argument of each fact to partition the database.
+After applying the first rule at node $@1$ we get the database in Fig~\ref{fig:exec_trace}~(b). Note that node $@1$ is now \texttt{unvisited} and nodes $@2$
+and $@4$ have now the fact \texttt{visit}. At this point we could either apply rule 1 at
+node $@2$ or node $@4$. For this specific trace, we apply the rule at node $@2$, resulting
+in Fig.~\ref{fig:exec_trace}~(c). Node $@4$ now has 2 \texttt{visit} facts, thus
+we can apply rule 1 followed by rule 2, therefore consuming both \texttt{visit} facts
+and deriving \texttt{visited}. In addition, we can also apply rule 1 at node $@3$ to
+get Fig.~\ref{fig:exec_trace}~(d).
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.5\textwidth}
+                \includegraphics[width=\textwidth]{execution_trace1}
+                \caption{Initial database.}
+                \label{fig:exec_trace1}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.5\textwidth}
+                \includegraphics[width=\textwidth]{execution_trace2}
+                \caption{After applying rule 1 at node $@1$.}
+                \label{fig:exec_trace2}
+        \end{subfigure}\\
+        \begin{subfigure}[b]{0.5\textwidth}
+                \includegraphics[width=\textwidth]{execution_trace3}
+                \caption{After applying rule 1 at node $@2$.}
+                \label{fig:exec_trace3}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad etc.
+         %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.5\textwidth}
+                  \includegraphics[width=\textwidth]{execution_trace4}
+                  \caption{After applying rule 1 and 2 (nodes $@3$, $@4$).}
+                  \label{fig:exec_trace4}
+          \end{subfigure}
+        \caption{One execution trace for the visit program.}\label{fig:exec_trace}
+\end{figure}
+
+Note that every node is now \texttt{visited}. It is easy to prove that if the graph is
+connected, then all the nodes will be \texttt{visited}, regardless the order in which we
+apply the rules.
+
+\section{Syntax}
+
+\renewcommand{\arraystretch}{1.5}
+
+
+\begin{table}[ht]
+   \centering
+\begin{tabular}{ l l c l }
+  Linear Facts & $L$ & $::=$ & $l(\hat{x})$\\
+  Persistent Facts & $P$ & $::=$ & $\bang p(\hat{x})$\\
+  Constraints & $C$ & $::=$ & $c(\hat{x})$ \\
+  Action Facts & $A$ & $::=$ & $a(\hat{x})$\\
+  Sensing Facts & $S$ & $::=$ & $s(\hat{x})$\\
+  Body Expressions & $BE$ & $::=$ & $L \; | \; P \; | \; C \; | \; BE, BE \; | \; \forall_{\widehat{x}}. BE \; | \; \exists_{\widehat{x}}. BE \; | \; 1$\\
+  Comprehensions & $CE$ & $::=$ & $\{ \; \widehat{x} \; | \; BE \; | \; CE \; \}$ \\
+  Aggregates & $AE$ & $::=$ & $[\;\m{aop} \Rightarrow y \; | \; \widehat{x} \; | \; BE \; | \; HE \;]$ \\
+  Exists constructor & $EE$ & $::=$ & $exists \; \widehat{x}. (HE)$ \\
+  Head Expressions & $HE$ & $::=$ & $A \; | \; L \; | \; P \; | \; HE, HE \; | \; EE \; | \; CE \; | \; AE \; | \; 1$\\
+  Rules & $R$ & $::=$ & $BE \lolli HE \; | \; [\; \m{sop} \Rightarrow y \; | \; BE \;] \lolli HE$ \\
+  Set Of Rules & $\Sigma$ & $::=$ & $\cdot \; | \; \Sigma, R$\\
+  Known Linear Facts & $\Delta$ & $::=$ & $\cdot \; | \; \Delta, l(\hat{t})$ \\
+  Known Persistent Facts & $\Gamma$ & $::=$ & $\cdot \; | \; \Gamma, \bang p(\hat{t})$ \\
+  Database & $D$ & $::=$ & $\Gamma; \Delta$ \\
+\end{tabular}
+\caption{Abstract syntax of \lang.}\label{tbl:ast}
+\end{table}
+
+\renewcommand{\arraystretch}{1.0}
+
+Fig.~\ref{tbl:ast} shows the abstract syntax for derivation rules in \lang.
+A \lang program consists of a set of derivation rules ($\Sigma$) and the database ($D$).
+Each derivation can be decomposed into a body ($BE$) and a head ($HE$). An example of
+a rule can be seen in line 11 in Fig.~\ref{code:visit}.
+The body of this rule is \texttt{visit(A), visited(A)} and the head is \texttt{visited(A)}.
+Rules without bodies are allowed in \lang and they are called axioms (line 15 in Fig.~\ref{code:visit}). Rules without heads are also allowed.
+
+The body of the rule ($BE$) contains \emph{fact expressions} ($L$ and $P$) and
+constraints ($C$). Fact expressions are template facts that instantiate variables
+(from facts in the database)
+such as \texttt{visit(A)} in line 11 in Fig.~\ref{code:visit}. Variables can be used again in the body for matching and
+also in the head when instantiating facts. Constraints are boolean expressions that must
+be true in order for the rule to be fired. Constraints use variables from fact expressions and are built using a small functional language that includes mathematical operations, boolean operations, external functions and literal values.
+
+The head of a rule ($HE$) contains \emph{fact templates} ($L$ and $P$) which are uninstantiated facts and will derive new facts. The head can also have \emph{exist constructs} ($EE$), \emph{comprehensions} ($CE$) and \emph{aggregates} ($AE$). All those constructs
+may use all the variables instantiated in the body.
+
+\subsection{Predicates and Facts}
+
+Each fact is an association between a \emph{predicate} and a tuple of values. A predicate is a pair with a name and a tuple of types (the argument types). \lang rules are type-checked using the predicate declarations in the header of the program. \lang has a simple type system that includes the following simples types: \emph{node}, \emph{int}, \emph{float}, \emph{string}, \emph{bool}. Recursive types such as \emph{list X} and \emph{pair X; Y} are
+also allowed.
+
+\subsection{Comprehensions}
+
+
+Comprehensions ($CE$) are sub-rules that are applied with all possible combinations using the facts from the database. In a comprehension $\{ \; \widehat{x} \; | \; BE \; | \; CE \; \}$,
+$\widehat{x}$ is the list of variables used inside $BE$ and $CE$. $BE$ and $CE$ are the
+body and head of the comprehensions, respectively.
+
+We have already seen an example of comprehensions in the visit program (Fig.~\ref{code:visit} line 9).
+Here, we match \texttt{!edge(A, B)} using all the combinations
+available in the database and for each combination we derive \texttt{visit(B)}.
+
+\subsection{Aggregates}
+
+Aggregates ($AE$) are a special kind of sub-rule that work very similarly to comprehensions.
+In the abstract syntax $[\;\m{aop} \Rightarrow y \; | \; \widehat{x} \; | \; BE \; |
+\; HE \;]$, $\m{aop}$ is the aggregate operation, $\widehat{x}$ are the variables
+introduced in $BE$ and $HE$ and $y$ is the variable that is used inside the body
+of the aggregate $BE$ and will be accumulated using $\m{aop}$. Like the comprehensions,
+we try all the combinations of $BE$, but, instead of deriving $HE$ for each combination,
+we accumulate the $y$ variable and derive $HE$ only once using $y$.
+
+To better understand aggregates, let's consider a database with facts
+\texttt{price(@1,~3)}, \texttt{price(@1,~4)}, \texttt{price(@1,~5)} and
+\texttt{count-prices(@1)}. Now, consider the following rule:
+
+\begin{Verbatim}
+   count-prices(A) -o [:sum => P | | price(A, P) | total(A, P)].
+\end{Verbatim}
+
+By applying this rule, we consume \texttt{count-prices(@1)} and need to
+derive the aggregate. The aggregate will consume all the \texttt{price(@1, P)} facts
+and sum all the $P$'s. Finally, we derive \texttt{total(@1, 12)} since \texttt{P = 12}.
+
+\lang provides several aggregate operations, including the minimum, maximum, sum, count, etc.
+
+\subsection{Selectors}
+
+When a rule body is instantiated using facts from the database, facts are picked
+non-deterministically. While our system uses an implementation dependent order for
+efficiency reasons, sometimes it is important to sort facts by one of the arguments
+because linearity imposes commitment during rule derivation. The abstract syntax for
+this construct is $[\; \m{sop} \Rightarrow y \; | \; BE \;] \lolli HE$, where
+$\m{sop}$ is the selector operation, $BE$ the body of the rule where variable $y$
+must be instantiated in the body of some fact and $HE$ is the head of the rule.
+An example using concrete syntax is as follows:
+
+\begin{Verbatim}
+[:min => W | !edge(A, B), weight(A, B, W)] -o edge-picked(A, B, W).
+\end{Verbatim}
+
+In this case, we will order the \texttt{weight} facts by $W$ in ascending order and then try
+to match them. Other operations available are $max$ and $random$ (to force randomization at the
+implementation level).
+
+\subsection{Exists Constructors}
+
+Exist constructs ($EE$) are based on the linear logic construct of the same name and are used to create new node addresses. Although implicitly we use the exists connective inside the body
+of the rule to instantiate variables from the database facts, in the head of the rule,
+it can be used explicitly to create new variables.   
+The following example illustrates the use of the exists constructor, where we derive
+\texttt{perform-work} at a new node \texttt{B}.
+
+\begin{Verbatim}
+   do-work(A, W) -o exists B. (perform-work(B, W)).
+\end{Verbatim}
+
+\section{Types of Facts}
+
+Beyond the distinction between linear and persistent facts, \lang further classifies facts
+into 4 categories: computation facts, structural facts, sensing facts and action facts.
+
+Computation facts are regular facts used to represent the program state. In the initial
+example in Fig.~\ref{code:visit}, \texttt{visit}, \texttt{visited} and \texttt{unvisited}
+are all computation facts.
+
+Structural facts describe information about the connections between the nodes in the graph.
+In the example of Fig.~\ref{code:visit}, the \texttt{edge} fact is structural since it
+is marked as a \texttt{route} predicate. Note that structural facts can be seen as
+computation facts since they also participate heavily in the program algorithm.
+
+Sensing facts are facts about the current state of the runtime system, such as the placement
+of nodes in the CPU and scheduling information. In the original Meld, sensing facts
+were used to get information about the outside world, like temperature, touch data,
+neighborhood status, etc.
+
+Action facts are linear facts which are consumed when the corresponding action is performed.
+In the original Meld, they were used to make the robots perform actions in the outside world.
+For \lang we use them to change information about the program state
+in the user interface. For example, when we want to change the color of nodes or the label
+of edges, we just derive a new action fact and the action is performed in the interface.
+A more important use of action facts is to change the order in which nodes
+are evaluated in the runtime system. It is possible to give hints to the virtual
+machine in order to prioritize the computation of some nodes.
+
+With sensing facts and action facts, we can write "meta-rules" that will sense the
+state of the runtime system and then apply decisions in order to improve execution speed.
+In some situations, this set of rules can be added to the program without any modifications
+to the original rules.
+
+%%% Starts here
+
+
+
+\section{Linearity}
+
+\lang differs greatly from other Datalog-like languages due to the use of linear logic~\cite{Girard95logic:its}. Traditional forward-chaining logic programming languages make only use of classical logic, in which derived facts are true forever. Many ad-hoc extensions~\cite{Liu98extendingdatalog,Ludascher95alogical} have been devised in the past to support state updates in Datalog, but most are extra-logical which makes it harder to reason about programs.
+
+We use a small subset of the original linear logic proof system with some extensions to improve
+the expressiveness of the language. We summarize the connectives used in Table~\ref{table:linear}.
+
+\begin{table*}
+   \begin{center}
+\resizebox{17cm}{!}{
+    \begin{tabular}{ | l | l | l | l | l |}
+    \hline
+    Connective & Place & \lang Syntax & \lang Example & Description \\ \hline \hline
+    $\emph{fact}(\hat{x})$ & Body or Head & $fact(\hat{x})$ & \texttt{path(A, P)} & Linear facts. \\ \hline
+    $\bang \emph{fact}(\hat{x})$ & Body or Head & $\bang fact(\hat{x})$ & \texttt{$\bang$edge(X, Y, W)} & Persistent facts. \\ \hline
+    $1$ & Head & $1$ & \texttt{1} & Represents rules with an empty head. \\ \hline
+    $A \otimes B$ & Body and Head & $A, B$ & \texttt{path(A, P), edge(A, B, W)} & Connect two expressions. \\ \hline
+    $\forall x. A$ & Rule & Please see $A \lolli B$ & \texttt{path(A, B) $\lolli$ reachable(A, B)} & To represent variables defined inside the rule. \\ \hline
+    $\exists x. A$ & Head & $exists \; \widehat{x}. (B)$ & \texttt{exists A.(path(A, P))} & Instantiates new node variables. \\ \hline
+    $A \lolli B$ & Rule & $A \lolli B$ & \texttt{path(A, B) $\lolli$ reachable(A, B)} & $\lolli$ means "linearly implies". \\& & & & $A$ is the body and $B$ is the head. \\ \hline
+    $\m{def} A. B$ & Head & $\{\widehat{x} | A | B\}$ & \texttt{\{B | !edge(A, B) | visit(B)\}} & Extension called definitions.\\ & & & & Used for comprehensions and aggregates. \\ \hline
+    \end{tabular}
+}
+\end{center}
+\caption{Connectives from Linear Logic used in \lang.}
+\label{table:linear}
+\end{table*}
+
+\section{Distribution}
+
+The first argument of every predicate must be typed as a \emph{node}. The node represents a vertex in the graph data structure.
+Essentially, a program can be seen as a graph data structure where processors do computation at the node/vertex level. Computation is
+parallelized by processing many nodes concurrently. With the use of structural facts, it is
+nodes are linked and can exchange facts between them.
+
+For distribution and data partitioning purposes, derivation rules are constrained by the expressions that can be written in the body.
+The body of every rule can only refer to facts in the same node.
+However, the expressions in the head may refer to other nodes, as long as those nodes are instantiated in the body of the rule.
+The database of the program is then partitioned by the first argument of each fact. This is possible since the rules of the
+program only make use of facts from a single node.
+We drew some inspiration from the Linda system~\cite{1663305}, where the tuple space contains the data and is used by the processors
+to communicate and do computation.
+This differs from imperative languages, since in those languages data and computation are two separate entities.
+
+\section{Operational Semantics}
+
+The execution is performed at the node level and can happen non-deterministically (i.e., any node can
+be picked to run). This means that the programmer cannot expect
+that facts coming from other nodes will be considered as a whole or partially.
+Usually, it is preferable that rules are written as if rule order didn't matter, although
+rule order makes things easier for ordering local computation.
+
+Each rule in \lang has a defined priority that is inferred from its position in the source file.
+Rules at the beginning of the file have higher priority. At the node level, we consider all
+the new facts that have been not consider before in order to create a set of \emph{candidate rules}.
+The set of candidate rules is then applied (by priority) and updated as new facts are derived or consumed.
+Section~\ref{sec:core_engine} gives details in how our implementation manages the set of candidate rules.
+
+\section{Programs}
+
+In this section, we present several \lang programs in order to show that they tend to be concise and
+easy to write. We also want to make clear how the language facilities can be used to solve more
+complicated algorithms, including the quick-sort algorithm that at the first glance does not seem
+to fit in the \lang paradigm.
+
+\subsection{Quick-Sort}
+
+The quick-sort algorithm is a divide and conquer sorting algorithm that works by splitting
+a list of items into two sublists and then recursively sorting the two sublists.
+To split the list, we pick a pivot element and put the items that are smaller than the pivot
+into the first sublist and items greater than the pivot into the second list.
+
+The quick-sort algorithm is interesting because it does not map immediately to the graph-based
+model of \lang. Our approach considers that the program starts with a single node where
+the initial list is located. Then we split the list as usual and create two nodes
+that will recursively sort the sublists. Interestingly, this will create a tree
+that will look similar to a call tree in a functional language.
+
+Fig.~\ref{code:quicksort} presents the code for the quick-sort algorithm in \lang.
+For each sublist to sort, we start with a \texttt{down} fact that must be (eventually)
+transformed into an \texttt{up} fact, where the sublist in the \texttt{up} fact is sorted.
+In line 12 we start with the initial list at node \texttt{@0}. Lines 14-17 will immediately
+sort the list when the number of items is very small. Otherwise, we apply the rule in line 18.
+\texttt{buildpivot} will first split the list using the pivot \texttt{X} using rules in
+lines 24-27. When there is nothing more to split, we apply the rule in lines 20-23
+that uses an exist constructor create nodes \texttt{B} and \texttt{C}. The sublists
+are then sent to these nodes using \texttt{down} facts. Note, however, that we also
+derive \texttt{back} facts, that will be used to send the sorted list back using the rule
+in line 41.
+
+When the sublists are finally sorted, we get two \texttt{sorted} facts that will match
+against \texttt{waitpivot} in the rule located in lines 29-32. The sorted sublists
+are appended and then an \texttt{up} fact is finally derived (line 38).
+
+\begin{figure}[h!]
+\small\begin{Verbatim}[numbers=left]
+type linear route edge(node, node).
+type route back(node, node).
+type linear down(node, list int).
+type linear up(node, list int).
+type linear sorted(node, node, list int).
+type linear buildpivot(node, list int, int, list int, list int).
+type linear waitpivot(node, node, node, int).
+type linear append(node, list int, list int).
+type linear reverse(node, list int, list int, list int).
+type linear reverse2(node, list int, list int).
+
+down(@0, tosort).
+
+down(A, []) -o up(A, []).
+down(A, [X]) -o up(A, [X]).
+down(A, [X, Y]), X < Y -o up(A, [X, Y]).
+down(A, [X, Y]), X >= Y -o up(A, [Y, X]).
+down(A, [X | L]) -o buildpivot(A, L, X, [], []).
+
+buildpivot(A, [], X, Smaller, Greater)
+   -o exists B, C. (back(B, A), down(B, Smaller),
+            back(C, A), down(C, Greater), waitpivot(A, B, C, X)).
+
+buildpivot(A, [Y | L], X, Smaller, Greater), Y <= X
+   -o buildpivot(A, L, X, [Y | Smaller], Greater).
+buildpivot(A, [Y | L], X, Smaller, Greater), Y > X
+   -o buildpivot(A, L, X, Smaller, [Y | Greater]).
+   
+waitpivot(A, NodeSmaller, NodeGreater, Pivot),
+sorted(A, NodeSmaller, Smaller),
+sorted(A, NodeGreater, Greater)
+   -o append(A, Smaller, [Pivot | Greater]).
+
+append(A, L1, L2) -o reverse(A, L1, L2, []).
+
+reverse(A, [], L2, L3) -o reverse2(A, L3, L2).
+reverse(A, [X | L], L2, L3) -o reverse(A, L, L2, [X | L3]).
+reverse2(A, [], Result) -o up(A, Result).
+reverse2(A, [X | L1], L2) -o reverse2(A, L1, [X | L2]).
+
+up(A, L), back(A, B) -o sorted(B, A, L).
+\end{Verbatim}
+  \caption{Quick-Sort program.}
+  \label{code:quicksort}
+\end{figure}
+\normalsize
+
+\subsection{Bipartiteness Checking}
+
+The problem of checking if a graph is bipartite can be seen as a 2-color graph coloring problem.
+The code for this algorithm is shown in Fig.~\ref{code:bichecking}. All nodes in the graph
+start as \texttt{unchecked}, because they do not have a color yet. The axiom \texttt{visit(@1, 1)} is
+instantiated at node \texttt{@1} (line 9) in order to color this node with color 1.
+
+If a node is \texttt{unchecked} and needs to be marked with a color \texttt{P} then the rule in
+lines 11-12 is applied. We consume the \texttt{unchecked} fact and derive a \texttt{checked(A, P)}
+to effectively color the node with \texttt{P}. We also derive \texttt{visit(B, next(P))} in
+our neighbor nodes in order to color them with the other color.
+
+The coloring can fail is the node is already colored and a color \texttt{P} and needs to be colored
+with a different color (line 14) or if it has already failed (line 16).
+
+\begin{figure}[h!]
+\small\begin{Verbatim}[numbers=left]
+type route edge(node, node).
+type linear visit(node, int).
+type linear unchecked(node).
+type linear checked(node, int).
+type linear fail(node).
+
+fun next(int X) : int = if X <> 1 then 1 else 2 end.
+
+visit(@1, 1).
+
+visit(A, P), unchecked(A)
+   -o {B | !edge(A, B) | visit(B, next(P))}, checked(A, P).
+
+visit(A, P1), checked(A, P2), P1 <> P2 -o fail(A).
+visit(A, P), checked(A, P) -o checked(A, P).
+visit(A, P), fail(A) -o fail(A).
+\end{Verbatim}
+  \caption{Bipartiteness Checking program.}
+  \label{code:bichecking}
+\end{figure}
+\normalsize
+
+\subsection{N Queens}
+
+
+The N queens~\cite{8queens} puzzle is the problem of placing N chess queens on an NxN chessboard so
+that no pair of two queens attack each other. The specific challenge of finding all the distinct
+solutions to this problem is a good benchmark in designing parallel algorithms.
+
+First, we consider each square of the chessboard as a node
+that can communicate with the adjacent left, right and bottom squares, but not top square.
+The states are represented as a list of integers, where each integer is the column number where
+the queen was placed. For example $[2, 0]$ means that a queen was placed in $(0, 0)$ and $(1, 2)$.
+
+An empty state is instantiated in the top-left node and is then propagated to all nodes in the same row.
+Every node will then check if a queen can be placed on the square. If true, each node will send the new
+state to the row below.
+Recursively, when a node receives a new state, it will (1) send the state to the left
+and to the right and (2) try to place the queen in its square. With this method,
+all states will be computed since we have facts for each valid state
+at that point. When a square cannot place a queen, that state is deleted.
+When the program ends, the states will be placed in the bottom row.
+
+We find our solution very elegant, since it can be easily executed in parallel and there are no
+wasted computations, because any distinct placement will be computed only once.
+
+\begin{comment}
+\begin{figure}[h!]
+\small\begin{Verbatim}[numbers=left]
+type left(node, node).
+type right(node, node).
+type down(node, node).
+type coord(node, int, int).
+type linear propagate-left(node, list node, list int).
+type linear propagate-right(node, list node, list int).
+type linear receive-down(node, list node, list int).
+type linear test-and-send-down(node, list node, list int).
+type linear test-y(node, int, list int, list node, list int).
+type linear test-diag-left(node, int, int, list int, list node, list int).
+type linear test-diag-right(node, int, int, list int, list node, list int).
+type linear send-down(node, list node, list int).
+type linear final-state(node, list node, list int).
+
+const size = 11.
+
+receive-down(@0, [], []).
+
+receive-down(A, Nodes, Coords)
+   -o {R | !right(A, R), R <> A | propagate-right(R, Nodes, Coords)},
+      {L | !left(A, L), L <> A | propagate-left(L, Nodes, Coords)},
+      test-and-send-down(A, Nodes, Coords).
+
+propagate-left(A, Nodes, Coords)
+   -o {L | !left(A, L), L <> A | propagate-left(L, Nodes, Coords)},
+      test-and-send-down(A, Nodes, Coords).
+
+propagate-right(A, Nodes, Coords)
+   -o {R | !right(A, R), R <> A | propagate-right(R, Nodes, Coords)},
+      test-and-send-down(A, Nodes, Coords).
+
+test-and-send-down(A, Nodes, Coords),
+!coord(A, X, Y)
+   -o test-y(A, Y, Coords, Nodes, Coords).
+
+test-y(A, Y, [], Nodes, Coords), !coord(A, OX, OY) -o test-diag-left(A, OX - 1, OY - 1, Coords, Nodes, Coords).
+test-y(A, Y, [X, Y1 | RestCoords], Nodes, Coords), Y = Y1 -o 1. // fail
+test-y(A, Y, [X, Y1 | RestCoords], Nodes, Coords), Y <> Y1 -o test-y(A, Y, RestCoords, Nodes, Coords).
+
+test-diag-left(A, X, Y, _, Nodes, Coords),
+X < 0 || Y < 0,
+!coord(A, OX, OY)
+   -o test-diag-right(A, OX - 1, OY + 1, Coords, Nodes, Coords).
+
+test-diag-left(A, X, Y, [X1, Y1 | RestCoords], Nodes, Coords),
+X = X1, Y = Y1
+   -o 1. // fail
+
+test-diag-left(A, X, Y, [X1, Y1 | RestCoords], Nodes, Coords),
+X <> X1 || Y <> Y1
+   -o test-diag-left(A, X - 1, Y - 1, RestCoords, Nodes, Coords).
+
+test-diag-right(A, X, Y, [], Nodes, Coords),
+X < 0 || Y >= size,
+!coord(A, OX, OY)
+   -o send-down(A, [A | Nodes], [OX, OY | Coords]).
+
+test-diag-right(A, X, Y, [X1, Y1 | RestCoords], Nodes, Coords),
+X = X1, Y = Y1
+   -o 1. // fail
+
+test-diag-right(A, X, Y, [X1, Y1 | RestCoords], Nodes, Coords),
+X <> X1 || Y <> Y1
+   -o test-diag-right(A, X - 1, Y + 1, RestCoords, Nodes, Coords).
+
+send-down(A, Nodes, Coords),
+!down(A, A)
+   -o final-state(A, Nodes, Coords).
+   
+send-down(A, Nodes, Coords),
+!down(A, B),
+A <> B
+   -o receive-down(B, Nodes, Coords).
+\end{Verbatim}
+  \caption{Visit program.}
+  \label{code:visit}
+\end{figure}
+\normalsize
+\end{comment}
+
+\section{Summary}
+
+In this chapter we gave an overview of the \lang language, including its syntax and operational semantics.
+We also explained how to write programs using all the facilities provided by \lang, including
+linear facts and comprehensions. Since \lang uses implicit parallelism, programs can be run in parallel
+in multicore architectures without any modification.
