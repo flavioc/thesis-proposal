@@ -4,22 +4,241 @@
 \newcommand{\comp}[0]{\m{comp} \;}
 \newcommand{\az}{\m{apply} \;}
 \newcommand{\doz}{\m{run} \;}
+\newcommand{\seqnocut}[3]{#1 ; #2 \Rightarrow #3}
+\newcommand{\defeq}{\buildrel\triangle\over =}
+\newcommand{\compr}[1]{\m{def} \; #1}
+
+\newcommand{\mo}{\m{match}_1 \;}
+\newcommand{\cont}{\m{cont} \;}
+\newcommand{\contc}{\m{contc} \;}
+\newcommand{\done}{\m{derive}_1 \;}
+\newcommand{\doo}{\m{run}_1 \;}
+\newcommand{\mc}[0]{\m{match}_c \; }
+\newcommand{\dall}[0]{\m{fix} \; }
+\newcommand{\strans}[0]{\m{strans} \;}
+\newcommand{\dc}{\m{derive}_c \;}
+\newcommand{\ao}{\m{apply}_1 \;}
 
 This chapter provides a brief overview of the proof theoretic basis behind \lang and the dynamic semantics
-of the language.
+of the language. First, we will present the subset of linear logic from which \lang is built on. Second, we present the high level dynamic semantics (how rules are evaluated) followed by the low level dynamics, a close representation of how to virtual machine runs. Finally, we give an overview of the soundness proof of the low level semantics.
 
 \section{Linear Logic}
 
-talk briefly about linear logic and definitions/fixpoints
+\lang differs greatly from other Datalog-like languages due to the use of linear logic~\cite{Girard95logic:its}. Traditional forward-chaining logic programming languages make only use of classical logic, in which derived facts are true forever. Many ad-hoc extensions~\cite{Liu98extendingdatalog,Ludascher95alogical} have been devised in the past to support state updates in Datalog, but most are extra-logical which makes it harder to reason about programs.
+\lang uses linear logic as its foundation, therefore state updates are completely natural to the language.
 
-\subsection{Comprehensions and Aggregates}
-\subsection{Cut-Elimination Proof}
+We use a small subset of the original linear logic proof along with an extension for definitions to improve
+the expressiveness of the language. We summarize the connectives used in Table~\ref{table:linear}
+and how they are related to the \lang syntax.
+
+\begin{table*}
+   \begin{center}
+\resizebox{16cm}{!}{
+    \begin{tabular}{ | l | l | l | l | l |}
+    \hline
+    Connective & Place & \lang Syntax & \lang Example & Description \\ \hline \hline
+    $\emph{fact}(\hat{x})$ & Body or Head & $fact(\hat{x})$ & \texttt{path(A, P)} & Linear facts. \\ \hline
+    $\bang \emph{fact}(\hat{x})$ & Body or Head & $\bang fact(\hat{x})$ & \texttt{$\bang$edge(X, Y, W)} & Persistent facts. \\ \hline
+    $1$ & Head & $1$ & \texttt{1} & Represents rules with an empty head. \\ \hline
+    $A \otimes B$ & Body and Head & $A, B$ & \texttt{path(A, P), edge(A, B, W)} & Connect two expressions. \\ \hline
+    $\forall x. A$ & Rule & Please see $A \lolli B$ & \texttt{path(A, B) $\lolli$ reachable(A, B)} & To represent variables defined inside the rule. \\ \hline
+    $\exists x. A$ & Head & $exists \; \widehat{x}. (B)$ & \texttt{exists A.(path(A, P))} & Instantiates new node variables. \\ \hline
+    $A \lolli B$ & Rule & $A \lolli B$ & \texttt{path(A, B) $\lolli$ reachable(A, B)} & $\lolli$ means "linearly implies". \\& & & & $A$ is the body and $B$ is the head. \\ \hline
+    $\m{def} A. B$ & Head & $\{\; \widehat{x} \; | \; A \; | \; B \; \}$ & \texttt{\{B | !edge(A, B) | visit(B)\}} & Extension called definitions.\\ & & & & Used for comprehensions and aggregates. \\ \hline
+    \end{tabular}
+}
+\end{center}
+\caption{Connectives from Linear Logic used in \lang.}
+\label{table:linear}
+\end{table*}
+
+The sequent calculus for our linear logic fragment is shown in Fig.~\ref{linear_logic}.
+The sequent has the form $\Psi ; \seqnocut{\Gamma}{\Delta}{C}$, where $\Psi$ is the typed
+term context used in the quantifiers, $\Gamma$ is the multi-set of persistent facts, $\Delta$
+is the multi-set of linear facts and $C$ is the term we want to prove.
+
+Most connectives in our fragment are standard and well known, except for the $\compr{A}$ connective. This
+connective is a definition that can be unfolded recursively and is used to logically justify
+comprehensions and aggregates. We took inspiration from Baelde's work on least and greatest fixed points
+in linear logic~\cite{Baelde:2012:LGF:2071368.2071370}. Baelde's system goes beyond simple recursive
+definitions and allows proofs using induction and co-induction proofs in linear logic. Fortunately,
+the proof system satisfies cut-elimination which makes it consistent. 
+
+In a comprehension, we want to imply an implication as many times as possible matches we can do
+using the current database. One way to formally describe comprehensions would be to use persistent
+rules that would be used a few times and then would be forgotten. A more reasonable approach is to use
+definitions. Given a comprehension $C$ with a body $A$ and a head $B$, then we can build the following definition:
+
+\[
+\compr{C} \defeq 1 \with ((A \lolli B) \otimes \compr{C})
+\]
+
+We can unfold $\compr{C}$ to either stop (by selecting $1$) or get a new linear implication $A \lolli B$
+to apply the comprehension once. Because we also get another $\compr{C}$ by selecting the right hand side,
+the comprehension can be applied again, recursively.
+
+Aggregates work identically, but they need an extra argument to accumulate the aggregated value.
+If an aggregate $C$ uses the \texttt{sum} operation and has a body $B$ then the definition will be
+as follows:
+
+\[
+\compr{C} \; V \defeq (\lambda v. B)V \with (\forall x. Ax \lolli \compr{C} \; (x + V))
+\]
+
+The aggregate is initiated as $\compr{C} \; 0$.
+
+\begin{figure}[ht]
+\[
+\infer[\one R]
+{\Psi ; \seqnocut{\Gamma}{\cdot}{\one}}
+{}
+\tab
+\infer[\one L]
+{\Psi ; \seqnocut{\Gamma}{\Delta, \one}{C}}
+{\Psi ; \seqnocut{\Gamma}{\Delta}{C}}
+\]
+
+\[
+\infer[\with R]
+{\Psi ; \seqnocut{\Gamma}{\Delta}{A \with B}}
+{\Psi ; \seqnocut{\Gamma}{\Delta}{A} & \seqnocut{\Gamma}{\Delta}{B}}
+\tab
+\infer[\with L_1]
+{\Psi ; \seqnocut{\Gamma}{\Delta, A \with B}{C}}
+{\Psi ; \seqnocut{\Gamma}{\Delta, A}{C}}
+\tab
+\infer[\with L_2]
+{\Psi ; \seqnocut{\Gamma}{\Delta, B \with B}{C}}
+{\Psi ; \seqnocut{\Gamma}{\Delta, B}{C}}
+\]
+
+\[
+\infer[\otimes R]
+{\Psi ; \seqnocut{\Gamma}{\Delta, \Delta'}{A \otimes B}}
+{\Psi ; \seqnocut{\Gamma}{\Delta}{A} & \seqnocut{\Gamma}{\Delta}{B}}
+\tab
+\infer[\otimes L]
+{\Psi ;\seqnocut{\Gamma}{\Delta, A \otimes B}{C}}
+{\Psi ; \seqnocut{\Gamma}{\Delta, A, B}{C}}
+\]
+
+\[
+\infer[\lolli R]
+{\Psi ; \seqnocut{\Gamma}{\Delta}{A \lolli B}}
+{\Psi ; \seqnocut{\Gamma}{\Delta, A}{B}}
+\tab
+\infer[\lolli L]
+{\seqnocut{\Gamma}{\Delta, \Delta', A \lolli B}{C}}
+{\Psi ; \seqnocut{\Gamma}{\Delta}{A} &
+   \Psi ; \seqnocut{\Gamma}{\Delta', B}{C}}
+\]
+
+\[
+\infer[\forall R]
+{\Psi ; \seqnocut{\Gamma}{\Delta}{\forall n:\tau. A}}
+{\Psi, m:\tau ; \seqnocut{\Gamma}{\Delta}{A\{m/n\}}}
+\tab
+\infer[\forall L]
+{\Psi ; \seqnocut{\Gamma}{\Delta, \forall n:\tau. A}{C}}
+{\Psi \vdash M : \tau & \Psi ; \seqnocut{\Gamma}{\Delta, A\{M/n\}}{C}}
+\]
+
+\[
+\infer[\exists R]
+{\Psi ; \seqnocut{\Gamma}{\Delta}{\exists n: \tau. A}}
+{\Psi \vdash M : \tau &
+   \Psi ; \seqnocut{\Gamma}{\Delta}{A \{M/n\}}}
+\tab
+\infer[\exists L]
+{\Psi ; \seqnocut{\Gamma}{\Delta, \exists n:\tau. A}{C}}
+{\Psi, m:\tau ; \seqnocut{\Gamma}{\Delta, A\{m/n\}}{C}}
+\]
+
+\[
+\infer[\bang R]
+{\Psi ; \seqnocut{\Gamma}{\cdot}{\bang A}}
+{\Psi ; \seqnocut{\Gamma}{\cdot}{A}}
+\tab
+\infer[\bang L]
+{\Psi ; \seqnocut{\Gamma}{\Delta, \bang A}{C}}
+{\Psi ; \seqnocut{\Gamma, A}{\Delta}{C}}
+\tab
+\infer[\m{copy}]
+{\Psi ; \seqnocut{\Gamma, A}{\Delta}{C}}
+{\Psi ; \seqnocut{\Gamma, A}{\Delta, A}{C}}
+\]
+
+\[
+\infer[\m{def} \; R]
+{\Psi ; \seqnocut{\Gamma}{\Delta}{\compr{A'}}}
+{\Psi ; \seqnocut{\Gamma}{\Delta}{B\theta} &
+ A \defeq B & A' \doteq A\theta}
+\tab
+\infer[\m{def} \; L]
+{\Psi ; \seqnocut{\Gamma}{\Delta, \compr{A'}}{C}}
+{
+   \Psi ; \seqnocut{\Gamma}{\Delta, B\theta}{C} & A \defeq B & A' \doteq A\theta
+}
+\]
+\caption{Linear logic fragment used in \lang.}\label{linear_logic}
+\end{figure}
 
 \section{High Level Dynamic Semantics}
 
-present the high level dynamic semantics
+In this section, we are going to present the high level dynamic semantics of \lang. The semantics
+formalize the mechanism of matching rules and deriving new facts. The high level semantics
+present a simplified overview of the dynamics of the language that are more closer to the formalism
+of linear logic present in Fig.~\ref{linear_logic} than the implementation principles of our
+virtual machine.
+
+Both the high level and low level semantics do not model the use of variable bindings when matching
+facts from the database. The formalization of bindings tends to complicate the formal system and it is not
+necessary for a good understanding of the system. Instead, we assume that all facts of
+type $\emph{fact}(\hat{x})$ do not have the argument $\hat{x}$.
+
+Starting from the linear logic fragment presented earlier, we consider $\Gamma$ and $\Delta$ the database
+of our program. $\Gamma$ contains the database of persistent facts while $\Delta$ the database of linear
+facts. We assume that the rules of the program are persistent linear implications of the form
+$\bang (A \lolli B)$, that can be used several times. However, we do not put the rules in the $\Gamma$
+context but in a separate context $\Phi$.
+
+The main idea of the dynamic semantics is to mostly ignore the right side of the sequent calculus
+and use inversion on the $\Delta$ and $\Gamma$ context so that we only have atomic facts.
+To apply rules we use chaining by focusing on one of the derivation rules in $\Phi$. Note
+that in the focusing process we assume that all the atoms (facts) are positive thus the chaining
+becomes a forward chaining process.
+
+\subsubsection{Application}
+
+The main judgment of the system is $\doz \Gamma; \Delta; \Phi \rightarrow \Xi'; \Delta'; \Gamma'$.
+$\Gamma$, $\Delta$ and $\Phi$ have the meaning explained before, while $\Xi'$, $\Delta'$ and $\Gamma'$
+are output multi-sets from applying one of the rules in $\Phi$. $\Xi'$ is the set of consumed linear
+resources, $\Delta'$ is the set of derived linear facts and $\Gamma'$ is the set of derived persistent
+facts. Note that for the high level semantics there is no concept of rule priority, so we pick a rule
+non-deterministically.
+
+The judgment $\az \Gamma ; \Delta ; A \lolli B \rightarrow \Xi'; \Delta'; \Gamma'$ will attempt to apply
+the derivation rule $A \lolli B$. To do this, it splits the $\Delta$ context into two, namely the
+set of linear resources consumed to match the body of the rule and the remaining facts. Again the
+set of resources needed to match the body of the rule is guessed. The low level dynamic semantics will
+handle this.
+
+\[
+\infer[\az rule]
+{\az \Gamma ; \Delta, \Delta'' ; A \lolli B \rightarrow \Xi' ; \Delta' ; \Gamma'}
+{\mz \Gamma ; \Delta ; A \rightarrow \Delta & \dz \Gamma ; \Delta''; \Delta; \cdot ; \cdot ; B \rightarrow \Xi' ; \Delta' ; \Gamma'}
+\]
+
+\[
+\infer[\doz rule]
+{\doz \Gamma ; \Delta ; R, \Phi \rightarrow \Xi' ; \Delta' ; \Gamma'}
+{\doz \Gamma ; \Delta ; R \rightarrow \Xi' ; \Delta' ; \Gamma'}
+\]
 
 \subsubsection{Match}
+
+The $\mz \Gamma ; \Delta \rightarrow C$ judgment essentially uses the right rules of the original
+linear logic fragment in order to match all facts using $\Gamma$ and $\Delta$.
 
 \[
 \infer[\mz 1]
@@ -41,7 +260,29 @@ present the high level dynamic semantics
 {\mz \Gamma; \Delta_1 \rightarrow A & \mz \Delta_2 \rightarrow B}
 \]
 
-\subsubsection{Derive}
+\subsubsection{Derivation}
+
+The derivation judgment has the form $\dz \Gamma ; \Delta ; \Xi ; \Gamma_1 ; \Delta_1 ; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$ with the following meaning:
+
+\begin{enumerate}
+   \item[$\Gamma$] the multi-set of persistent resources in the database.
+   \item[$\Delta$] the multi-set of linear resources in the database not yet consumed.
+   \item[$\Xi$] the multi-set of linear resources that have been consumed while matching the body of the rule, matching comprehensions or aggregates.
+   \item[$\Gamma_1$] the multi-set of persistent facts that have been derived using the current rule.
+   \item[$\Delta_1$] the multi-set of linear facts that have been derived using the current rule.
+   \item[$\Omega$] an ordered list contain the terms of the head of rule that still need to be derived. We start with the head of the rule $B$ that is continuously deconstructed to derive all the facts of the rule.
+   \item[$\Xi'$] the consumed linear facts to apply this rule.
+   \item[$\Delta'$] the derived linear facts.
+   \item[$\Gamma'$] the derived persistent facts.
+\end{enumerate}
+
+We did not include the aggregates here because they are similar to comprehensions. The main rule to
+derive comprehensions is $\dz comp$. It unfolds the comprehension which it can be then either
+applied ($\dz \with R$ followed by $\dz \lolli$) or not ($\dz \with L$). The high level semantics
+do not take into account the contents of the database to determine how many times a comprehension
+should be applied because it is entirely non-deterministic.
+
+
 
 \[
 \infer[\dz p]
@@ -98,26 +339,155 @@ present the high level dynamic semantics
 {\dz \Gamma ; \Delta ; \Xi ; \Gamma_1 ; \Delta_1 ; B, \Omega \rightarrow \Xi' ; \Delta' ; \Gamma'}
 \]
 
-\subsubsection{Apply}
-
-\[
-\infer[\az rule]
-{\az \Gamma ; \Delta, \Delta'' ; A \lolli B \rightarrow \Xi' ; \Delta' ; \Gamma'}
-{\mz \Gamma ; \Delta ; A \rightarrow \Delta & \dz \Gamma ; \Delta''; \Delta; \cdot ; \cdot ; B \rightarrow \Xi' ; \Delta' ; \Gamma'}
-\]
-
-\[
-\infer[\doz rule]
-{\doz \Gamma ; \Delta ; R, \Phi \rightarrow \Xi' ; \Delta' ; \Gamma'}
-{\doz \Gamma ; \Delta ; R \rightarrow \Xi' ; \Delta' ; \Gamma'}
-\]
-
 \section{Low Level Dynamic Semantics}
 
-not sure if i'm going to write down the complete high level system or just the general ideas
+The low level dynamic semantics remove all the non-deterministic choices in the previous dynamics
+and makes them deterministic. The new semantics will do the following:
 
-add to appendix?
+\begin{itemize}
+   \item Match rules by priority order;
+   \item Determine the set of linear facts needed to match either the body of the rule or the body of comprehensions without guessing;
+   \item Apply as many comprehensions as the database allows.
+\end{itemize}
+
+The complete set of inference rules for the semantics are presented in Appendix~\ref{low_level_semantics}
+since it is too long to be shown here.
+
+\subsection{Continuation Frames}
+
+The new semantics introduce the concept of continuation frames. Continuation frames are choice points
+created when we need to match some fact template against the database. The frame considers all the facts
+relevant to the template given the current variable bindings, that may or not fail during the remaining matching process. Note that we assume
+that facts have arguments and variable bindings although this is not explicit in the semantics
+presented in the Appendix.
+The frame contains enough state to resume the matching process at the time of its creation and
+to select the next candidate fact from the database.
+
+If at some point we cannot match a fact template due to a wrong choice that happened earlier on,
+we need to backtrack (judgment $\cont$ or $\contc$). Since we keep all the continuation frames in a continuation stack,
+we grab the top frame and select the next fact candidate to complete the matching process.
+If all candidates are exhausted, we pop the current frame and try the next one.
+
+By using this matching mechanism, we can determine which facts need to be used to match a rule.
+The virtual machine implemented for \lang works pretty much in the same way, by iterating over
+the available facts at each choice point and then committing to the rule if the matching process
+succeeds.
+
+\subsubsection{Continuation Frame Format}
+
+We have two continuation frames: linear continuation frames and persistent continuation frames.
+
+Linear frames have the form $(\Delta; \Delta_{next}; p; \Omega; \Xi; \Lambda; \Upsilon)$, where:
+
+\begin{enumerate}
+   \item[$\Delta$] Contains all the linear resources available at this choice point minus the other facts that can used to match $p$ (they are in $\Delta_{next}$).
+   \item[$\Delta_{next}$] The available options to match fact $p$ if the matching fails. When backtracking, we move one fact from $\Delta_{next}$ in $\Delta$.
+   \item[$p$] The fact template that created this frame.
+   \item[$\Omega$] Ordered list with the remaining terms we have to match to complete the matching process.
+   \item[$\Xi$] Multi-set of consumed linear facts up to this choice point.
+   \item[$\Lambda$] Multi-set of linear fact templates already matched. All those terms must have a matching fact in $\Xi$.
+   \item[$\Upsilon$] Multi-set of persistent fact templates already matched. All those terms must have a matching fact in $\Gamma$.
+\end{enumerate}
+
+Persistent frames are simpler with the form $[\Gamma_{next}; \Delta; \bang p; \Omega; \Xi; \Lambda; \Upsilon]$, where:
+
+\begin{enumerate}
+   \item[$\Gamma_{next}$] The multi-set of available options for $\bang p$ if the current matching process fails.
+   \item[$\Delta$] The multi-set of linear resources still available when the frame was created.
+   \item[$\bang p$] The fact template that created this frame.
+\end{enumerate}
+
+All the other arguments are equal to the ones used in the linear continuation frame.
+
+\subsection{Rule Priority}
+
+In order to respect rule priority, the low level dynamic semantics first try to match rules with
+higher priority. To do this, we use a continuation frame with type $(\Phi, \Delta)$, where $\Phi$
+is the list of remaining rules to try and $\Delta$ is the original $\Delta$ context. If the matching
+process of the current rule fails, we use this continuation frame to try the next rule in the list.
+
+\subsection{Comprehensions}
+
+The matching process for both comprehensions and aggregates work slightly different than matching the
+body of a rule. When the body of a rule is matched, we throw away the continuation stack since we
+do not need to backtrack. For comprehensions and aggregates, every time we succeed in matching the body
+we have to derive the head (for comprehensions only judgment $\m{derive}_c$) but we need to reuse the
+continuation stack to
+apply the comprehension (or aggregate) again. This is because the continuation stack contains,
+by definition, enough information to allow the comprehension to iterate over all possible matches.
+
+However, one needs to be careful in reusing the continuation stack. If we are matching the body
+\texttt{$\bang$a(X), b(X), c(X)} and the continuation stack has three frames (one per fact), we cannot
+backtrack to the frame of \texttt{c(X)} since at that point the matching process was assuming that the previous
+\texttt{b(X)} linear fact was still unconsumed. Therefore we need to backtrack to the first linear
+continuation frame, in this case \texttt{b(X)}. The judgment that performs such task is $\m{fix}$.
+Finally, we still have to update the state of every frame
+of the new continuation stack in order to remove all consumed facts from the frames ($\m{strans}$).
+
+Note that our continuation stack is split into two stacks: $C$ and $P$. $P$ contains only
+persistent continuation frames and is used first. $C$ is used for the first linear continuation frame
+that appears during matching. Any persistent frame that appears afterwards is put in $C$. This makes
+it easier to detect where the first linear frame is by just removing every frame except the first in $C$.
 
 \section{Soundness Proof}
 
-state the soundness proof theorem.
+The soundness theorem proves that if a rule was successfully derived in the low level semantics
+then it can also be successfully derived in the high level semantics. The inverse theorem, the
+completeness proof, cannot be proven correct because the low level semantics lack the non-determinism
+of the high level semantics.
+
+The first main lemma of the soundness proof proves that if we can match the body
+of a rule at the low level then we can also match the rule in the high level system using the same database.
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{lemma}[Body Match]
+   Given a match $\mo \Gamma; \Delta_1, \Delta_2; \cdot; A; B; \cdot; R \rightarrow \Xi'; \Delta'; \Gamma'$ that is related to $A$, $\Delta_1, \Delta_2$ and $\Gamma$, we get either:
+   
+   \begin{enumerate}
+      \item $\cont \cdot; B; R; \Gamma; \Xi'; \Delta'; \Gamma'$;
+      \item $\mz \Delta_2 \rightarrow A$ and $\mo \Gamma; \Delta_1; \Delta_2; \cdot; B; C'; R \rightarrow \Xi'; \Delta'; \Gamma'$ (related)
+   \end{enumerate}
+\end{lemma}
+\begin{proof}
+   Use the body match soundness theorem.
+\end{proof}
+
+When we say that a match is related to a term $A$ and a database $\Delta_1, \Delta_2, \Gamma$ we mean that
+the matching judgment is related to the body $A$ of a rule and the initial database is $\Delta_1, \Delta_2, \Gamma$. Moreover, the continuation stack is related to $A$ and to the database.
+
+The body match lemma tells us that if we start a match of a body $A$ we will either fail (1) and need to try another rule in $R$ or we succeed by building the high level matching judgment $\mz \Delta_2 \rightarrow A$ and reaching the end of the matching process $\mo \Gamma; \Delta_1; \Delta_2; \cdot; B; C'; R \rightarrow \Xi'; \Delta'; \Gamma'$.
+
+This lemma uses a more complicated theorem that is recursively defined through judgments $\m{match}_1$ and $\m{cont}$ that use mutual induction on the size of the continuation stack, the size of the remaining terms
+ to match and also the size of alternatives at each continuation frame.
+ 
+The second stepping stone in the soundness proof is the derivation lemma. After we successfully match the
+body of a rule, we need to prove that the derivation process (through judgments $\m{derive}_1$) is also
+sound. This lemma is as follows:
+
+\begin{lemma}[Derivation]
+   If $\do \Gamma; \Delta; \Xi; \Gamma_1; \Delta_1; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$ then $\dz \Gamma; \Delta; \Gamma_1; \Delta_1; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$.
+\end{lemma}
+\begin{proof}
+   Straightforward use of induction on $\Omega$ except for the sub-case of comprehensions and aggregates, where we need to use the comprehension and aggregate theorems to construct the derivation tree using $n$ applications of the corresponding construct.
+\end{proof}
+
+In the case of proving the soundness of comprehensions, we use a very identical theorem to the one used
+to prove the body match soundness. However, in this case we need to reuse the continuation stack several
+times (as many as many comprehensions can be applied). Using induction on the continuation stack, we get
+$n$ (where $n \ge 0$) applications of the comprehension and $n \; \m{match}$ and $n \m{derive}$ judgments
+that can be used to rebuild the derivation tree at the low level by using the $\dz \with L$, $\dz \with R$
+and $\dz \lolli$ rules to fold and unfold the comprehension term. The theorem for aggregates works similarly.
+
+\section{Summary}
+
+In this chapter we presented the proof theoretic foundations of \lang.
+First, we introduced the linear logic fragment that supports \lang. We then presented the
+high level dynamic semantics that was created by interpreting the linear logic fragment using
+focusing and chaining. Next, we designed
+a formal system called the low level dynamic semantics that mimics the execution of rules in
+our virtual machine minus small details.
+Finally, we gave a brief overview of the soundness proof of the low level dynamic semantics,
+thus proving that our virtual machine is sound in respect to our high level semantics.
+

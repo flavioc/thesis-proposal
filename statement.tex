@@ -1,0 +1,54 @@
+
+We propose Linear Meld (\lang), a new linear logic programming language that is a suitable
+to efficiently execute and scale parallel programs on multicore architectures.
+We argue that \lang is a suitable declarative programming model that offers execution
+control to the programmer through the use of coordination directives to make the program
+faster and more scalable. These coordination
+directives change how the runtime system schedules computation and can be written with the same
+facilities used to write standard program code. Finally, we want to show that the logical foundations
+of \lang can be leveraged to make program execution competitive when compared to implementations
+in other declarative languages.
+
+\lang will accomplish these goals using four main ideas:
+
+
+\begin{itemize}
+   \item Implicit Parallelism (mostly done)
+   
+   We divide the logical facts across all the nodes of the graph. Since the
+   logical rules only make use of data local to a node, computation can be performed at the
+   node level, disregarding the remaining nodes of the graph. We envision the program as
+   a graph data structure where each processing unit performs work on a different subset of the graph,
+   thus creating parallelism. Communication between processing units only happens when nodes send data
+   to nodes in other threads.
+   
+   \item Linear Logic (mostly done)
+
+   We integrated linear logic~\cite{Girard95logic:its} into our language, so that program state
+   can be encoded naturally. The original Meld was fully based on classical logic where everything that
+   is derived to be true forever. Linear logic turns some facts into resources that will be consumed when a rule is applied. We can leverage this sound logical foundation to prove many properties about our programs, including correctness and termination. To the best of our knowledge, \lang is the first
+   linear logic based language implementation that attempts to solve real world problems.
+
+   \item Coordination (partly done)
+   
+   We are using the concept of \emph{action facts} to coordinate the execution of programs.
+   We can increase the priority of certain nodes during runtime according to the state of the
+   computation and to the state of the runtime in order to make better scheduling decisions
+   so that programs can run faster.
+   For example, consider the shortest path program. We can pick nodes with shorter
+   distances to the source node before other nodes, so that convergence is reached faster.
+   We also use action facts to model output and to visualize the program's behavior in the
+   interfaces that we have built. We intend to add more coordination directives and action facts
+   and also write more programs that take advantage of coordination.
+
+   \item Implementation (partly done)
+
+   We have implemented a new compiler and a virtual machine prototype from scratch that executes on multicore machines\footnote{Source code is available at \url{http://github.com/flavioc/meld} (virtual machine) and \url{http://github.com/flavioc/cl-meld} (compiler).}.
+   To test the robustness and efficiency of our implementation, several different
+   and interesting programs were coded in \lang such as belief propagation~\cite{Gonzalez+al:aistats09paraml},
+   belief propagation with residual splash~\cite{Gonzalez+al:aistats09paraml}, PageRank~\cite{Page:2001:MNR},
+   graph coloring~\cite{PSP:2032868}, N queens~\cite{8queens}, shortest path~\cite{Dijkstra}, diameter estimation~\cite{5234320}, MapReduce~\cite{Dean:2008:MSD:1327452.1327492}, game of life, quick-sort, neural network training, among others. Our results show that \lang makes programs scalable, although it falls short when compared against other systems in absolute run time. We propose more optimization work
+   in order to make \lang more competitive against other systems. We want to leverage the sound logical
+   foundations of our language to optimize the compiler and runtime system.
+   
+\end{itemize}

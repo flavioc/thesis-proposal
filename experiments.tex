@@ -205,11 +205,23 @@ so that our analysis is not biased towards \lang. The \lang versions of PageRank
 half of the size of the GraphLab versions. However, \lang really shines in the Splash BP program because
 the code is much more concise than the corresponding code of GraphLab.
 
-\section{Comparison Against other Systems}
+\section{Comparison Against Other Systems}
+
+We also made some absolute runtime comparisons of \lang programs with the same programs written in
+other languages such as Prolog, Python and C/C++.
+
+In our experiments, the N Queens program runs
+more than 100 times slower when compared to a C implementation and 30 times slower than a Python
+implementation. The PageRank algorithm runs around 20 times slower than the identical GraphLab
+implementation and the SSSP program runs 60 times slower than the C version.
 
 Previously, we have seen that the \lang version of Splash BP program has the same scalability pattern
-as GraphLab (Fig.~\ref{exp:splashbp}), however our experiments show that \lang runs about 3 to 4 times slower in absolute terms. We have to note
-that \lang programs run as interpreted byte-code while GraphLab is a compiled C++ program.
+as GraphLab (Fig.~\ref{exp:splashbp}), however our experiments show that \lang runs about 3 to 4 times slower in absolute terms. This is better than the other comparisons and can be explained by the fact
+that most computation is done inside external C functions and not applying rules.
+
+We can see a correlation between the number of rules applied and facts derived and execution time.
+Because our virtual machine is still a work in progress, we can see plenty of optimization opportunities
+to improve these results.
 
 \section{Summary}
 

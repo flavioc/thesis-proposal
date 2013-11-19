@@ -244,38 +244,6 @@ state of the runtime system and then apply decisions in order to improve executi
 In some situations, this set of rules can be added to the program without any modifications
 to the original rules.
 
-%%% Starts here
-
-
-
-\section{Linearity}
-
-\lang differs greatly from other Datalog-like languages due to the use of linear logic~\cite{Girard95logic:its}. Traditional forward-chaining logic programming languages make only use of classical logic, in which derived facts are true forever. Many ad-hoc extensions~\cite{Liu98extendingdatalog,Ludascher95alogical} have been devised in the past to support state updates in Datalog, but most are extra-logical which makes it harder to reason about programs.
-
-We use a small subset of the original linear logic proof system with some extensions to improve
-the expressiveness of the language. We summarize the connectives used in Table~\ref{table:linear}.
-
-\begin{table*}
-   \begin{center}
-\resizebox{17cm}{!}{
-    \begin{tabular}{ | l | l | l | l | l |}
-    \hline
-    Connective & Place & \lang Syntax & \lang Example & Description \\ \hline \hline
-    $\emph{fact}(\hat{x})$ & Body or Head & $fact(\hat{x})$ & \texttt{path(A, P)} & Linear facts. \\ \hline
-    $\bang \emph{fact}(\hat{x})$ & Body or Head & $\bang fact(\hat{x})$ & \texttt{$\bang$edge(X, Y, W)} & Persistent facts. \\ \hline
-    $1$ & Head & $1$ & \texttt{1} & Represents rules with an empty head. \\ \hline
-    $A \otimes B$ & Body and Head & $A, B$ & \texttt{path(A, P), edge(A, B, W)} & Connect two expressions. \\ \hline
-    $\forall x. A$ & Rule & Please see $A \lolli B$ & \texttt{path(A, B) $\lolli$ reachable(A, B)} & To represent variables defined inside the rule. \\ \hline
-    $\exists x. A$ & Head & $exists \; \widehat{x}. (B)$ & \texttt{exists A.(path(A, P))} & Instantiates new node variables. \\ \hline
-    $A \lolli B$ & Rule & $A \lolli B$ & \texttt{path(A, B) $\lolli$ reachable(A, B)} & $\lolli$ means "linearly implies". \\& & & & $A$ is the body and $B$ is the head. \\ \hline
-    $\m{def} A. B$ & Head & $\{\widehat{x} | A | B\}$ & \texttt{\{B | !edge(A, B) | visit(B)\}} & Extension called definitions.\\ & & & & Used for comprehensions and aggregates. \\ \hline
-    \end{tabular}
-}
-\end{center}
-\caption{Connectives from Linear Logic used in \lang.}
-\label{table:linear}
-\end{table*}
-
 \section{Distribution}
 
 The first argument of every predicate must be typed as a \emph{node}. The node represents a vertex in the graph data structure.

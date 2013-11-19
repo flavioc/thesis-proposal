@@ -8,7 +8,11 @@ proposal.pdf: proposal.tex	\
 		language.tex \
 		experiments.tex \
 		proofs.tex \
-		roadmap.tex
+		roadmap.tex \
+		refs.bib \
+		appendix.tex \
+		statement.tex \
+		related_work.tex
 	pdflatex proposal.tex
 	pdflatex proposal.tex
 	bibtex proposal

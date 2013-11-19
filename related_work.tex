@@ -1,0 +1,82 @@
+
+
+\subsection{Declarative Programming}
+
+Many programming models have been developed in order to make parallel programs both easier to write and reason about. The most famous examples of such paradigms are \emph{logic programming} and \emph{functional programming}.
+In logic languages such as Prolog, researchers took advantage of the non-determinism of proof-search to evaluate subgoals
+in parallel with models such as \emph{or-parallelism} and \emph{and-parallelism}~\cite{Gupta:2001:PEP:504083.504085}.
+In functional languages, the stateless nature of computation allows multiple expressions to evaluate safely in parallel.
+This has been initially explored in several languages, such as NESL~\cite{Blelloch:1996:PPA:227234.227246} or Id~\cite{Nikhil93anoverview}, and later implemented in more modern languages such as Haskell~\cite{Chakravarty07dataparallel}.
+
+Recently, there has been an increasing interest in declarative and data-centric languages.
+MapReduce~\cite{Dean:2008:MSD:1327452.1327492}, for instance, is a popular data-centric programming
+model that is optimized for large clusters. The scheduling and data sharing model is very simple:
+in the \emph{map phase}, data is transformed at each node and the result reduced to a final
+result in the \emph{reduce phase}.
+
+Another declarative approach that is regaining popularity is Datalog~\cite{Ullman:1990:PDK:533142}, a
+bottom-up logic programming language that was the inspiration for the original Meld.
+Traditionally used in deductive databases, it is now being increasingly used in different fields
+such as distributed networking~\cite{Loo-condie-garofalakis-p2}, sensor
+nets~\cite{Chu:2007:DID:1322263.1322281} and cloud computing~\cite{alvaro:boom}.
+
+\subsection{Graph-Based Programming Models}
+
+Like Meld, many programming systems also model the program as a graph where computation will be performed.
+The Dryad system~\cite{Isard:2007:DDD:1272996.1273005} combines computational vertices
+with communication channels (edges) to form a data-flow graph. The program is scheduled to
+run on multiple computers or cores and data is partitioned during runtime. Routines that run on computational vertices
+are sequential, with no synchronization.
+
+The Pregel system~\cite{Malewicz:2010:PSL:1807167.1807184} is also graph based, although programs have a more strict
+structure. They must be represented as a sequence of iterations where each iteration is composed of computation and message passing.
+Pregel is specially suited to solve very big graphs
+and to scale to large architectures.
+
+GraphLab~\cite{GraphLab2010} is a C++ framework for developing parallel machine learning
+algorithms. While Pregel uses message passing, GraphLab allows nodes to have read/write
+access to different scopes through different concurrent access models in order to balance
+performance and data consistency. While some programs only need to access the local node's
+data, others may need to update edge information. Each consistency model will provide different
+guarantees that are better adapted to some algorithms. GraphLab also provides different
+schedulers that dictate the order in which node's are computed.
+
+\subsection{Linear Logic}
+
+Linear logic is a substructural logic proposed by Jean-Yves Girard~\cite{Girard95logic:its} that extends intuitionistic logic with the concept of \emph{truth as resources}. Instead of seeing the truth as immutable, truth is now something that can be consumed during the proof process.
+
+Since computer science is focused on processes and algorithms, linear logic has been used
+in many areas of computing such as programming languages, game semantics, concurrent programming, knowledge representation, etc.
+Due to the resource interpretation of the logic, linear logic present a good basis for programming
+languages that allow state manipulation.
+
+\subsection{Provability}
+
+Many techniques and formal systems have been devised to help reason about parallel programs.
+One such example is the Owicki-Gries~\cite{Owicki:1976:VPP:360051.360224} deductive system
+for proving properties about imperative parallel programs (deadlock detection, termination, etc).
+It extends Hoare logic with a stronger set axioms such as parallel execution, critical section
+and auxiliary variables. The formal system can be successfully used in small imperative
+programs, although using it on languages such as C is difficult since they do not
+restrict the use of shared variables.
+
+Some formal systems do not build on top of a known programming paradigm, but instead
+create an entirely new formal system for describing concurrent systems. Process calculus
+such as $\pi$-calculus~\cite{Milner:1999:CMS:329902} is a good example of this.
+The $\pi$-calculus describes the interactions between processes
+through the use of channels for communication. Interestingly, channels can also be transmitted as
+messages, allowing for changes in the network of processes.
+Given two processes, $\pi$-calculus is able to prove that they behave the same through
+the use of bisimulation equivalence.
+
+Another interesting model is Mobile UNITY~\cite{Roman97anintroduction}. The basic UNITY~\cite{UNITY} model assumes that statements could be executed non-deterministically
+in order to create parallelism and then uses this principle to prove properties about
+the system.
+Mobile UNITY transforms UNITY by adding locations to processes and removing the
+nondeterministic aspect from local processes. Processes could then communicate or move
+between locations.
+\begin{comment}
+Because \lang also uses locations (as nodes),
+we believe that it may be possible to express \lang programs in Mobile UNITY but
+we haven't look deeply into it.
+\end{comment}

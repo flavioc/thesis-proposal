@@ -1,24 +1,208 @@
 
-\section{Implementation Improvements}
+In this chapter we propose a research roadmap that will allows to fully establish the validity of our thesis.
+Our experimental results have shown promising results, although this still some work to be done to make
+\lang more usable in real world applications.
 
-Make meld run faster and closer to competing alternatives.
+\section{Compilation and Runtime Improvements}
+
+As we have seen in Chapter~\ref{chapter:exp}, \lang is able to scale programs reasonably well
+in multicore architectures.
+The use of coordination directives also help us improve the execution time of programs. However,
+when we compare the absolute execution time of programs against comparable implementations in
+languages such as C or Prolog, \lang is still not very competitive since it is many times slower.
+
+Although compiled \lang programs are byte-code interpreted, which is a natural
+source of overhead, we think this is still the best architecture for our system and the overhead
+is on the naïve compilation of programs. \lang programs can take advantage of the fact that
+\lang is logic-based language and thus it is possible to optimize and simplify the execution of rules
+if we prove that facts follow certain properties and constraints.
+
+We think that a big chunk of execution time is spent doing
+database operations such as matching and fetching sets of candidate facts.
+However, some programs such as N Queens are very computationally expensive since they have
+a lot of list manipulation operations.
+
+\subsection{Overhead Analysis}
+
+To better understand the sources of overhead of our virtual machine, we propose doing a series
+of experiments to understand where the most execution time is spent. We will gather the following
+items:
 
 \begin{itemize}
-   \item If nodes are on the same thread, directly process the facts on the other node.
-   \item improve matching engine
-   \item improve indexing
+   \item \textbf{Database search operations}
+   
+   Measure the time spent fetching or searching facts from the database. 
+   
+   \item \textbf{Database removal operations}
+   
+   Measure the time spent removing facts from the trie.
+   
+   \item \textbf{Temporary store operations}
+   
+   Measure the time looking for facts in the temporary store.
+   
+   \item \textbf{Rule engine}
+   
+   Measure the time spent calculating which rules must be scheduled to run and managing the priority queue of rules.
+   
+   \item \textbf{Rule measurement}
+   
+   Measure the time spent executing each rule of the program.
+   
+   \item \textbf{Fact statistics}
+   
+   Measure the number of facts derived and consumed for each predicate.
+   
+   \item \textbf{Communication overhead}
+   
+   Measure the communication overhead between threads.
+   
 \end{itemize}
+
+\subsection{Preliminary Optimization Ideas}
+
+After doing the previous analysis for each \lang program, we intend to try different VM optimizations, namely.
+
+\begin{itemize}
+   \item \textbf{Improve database indexing}
+   
+   Sometimes we need to search for facts where the second argument is a constant. It would be better to put the second argument at the top of trie in order to prune the most branches as soon as possible. We intend to employ a smarter compilation strategy, where we re-order the body of a rule to increase the number of such constraints and give information to the runtime system of the optimal ordering the the trie.
+   
+   \item \textbf{Improve temporary store}
+   
+   Currently the temporary store is just a simple linked list. We also need to look into the temporary store when rules are executed. If the temporary store is heavily used (which we think it is) we want to use an improve data structure.
+   
+   \item \textbf{Experiment other data structures for the database}
+   
+   Although the trie is good general data structure, it may not be optimal for certain types of predicates. For example, if a predicate has only one argument it may be best to just use a simple array, where each array position is the value of the argument. We should improve the runtime if the number of such facts is small.
+   
+   \item \textbf{Reduce communication overhead between nodes}
+   
+   When a thread needs to send a fact to another node that is located on that same thread, there is a certain overhead because we assume that other threads will also perform the same operation. We want to improve this by using specialized operations for nodes in the same thread. However, we need to pay attention to the use of work stealing since nodes sometimes are moved between threads.
+   
+   \item \textbf{Improve removal of facts from the database}
+
+   If a fact needs to be removed from the database, we simply remove the corresponding branch from the trie. However, if the same fact is derived later on and asserted into the database, it is potentially better to not remove the trie nodes but keep them for later use.
+   
+   \item \textbf{JIT compilation of computation heavy rules}
+   
+   If some rules use a lot of mathematical or list operations it may be worth trying to compile them into machine code instead of using interpreted byte-code.
+\end{itemize}
+
+\subsection{Invariant Optimizations}
+
+While the previous optimizations will probably yield some good improvements, we think that the biggest
+improvements can be reached by using invariant optimizations. By this, we mean proving certain
+properties about the program and its facts and then compiling the program accordingly.
+
+\begin{itemize}
+   
+   \item \textbf{Property facts}
+   
+   In most programs there is a set of linear facts that act as a field of the node. These facts may
+   be consumed and derived but they are never consumed because only their arguments change.
+   For example:
+
+\begin{Verbatim}
+a(A, X), b(A, X) -o a(A, Y).
+\end{Verbatim}
+
+   In this case we consume \texttt{a(A, X)} but we derive another \texttt{a(A, Y)} with a different
+   second argument. We want to prove that, for certain predicates, at any point in time there is only one
+   set of facts of that predicate and although they may be consumed, only the arguments change.
+   With this analysis, we can improve the code to avoid unnecessary re-derivations.
+   
+   \item \textbf{Triggering linear facts}
+   
+   Some facts never really trigger the execution of rule, because most rules need one or two special facts that
+   will activate the rule. Those facts are derived in only a few rules and are intermittently consumed and
+   re-derived. All the non-triggering facts never activate the execution of rules because they may be
+   property facts and are constantly present in the database.
+   We must prove which predicates potentially trigger the execution of rules and mark them as such.
+   
+   \item \textbf{Single use facts}
+   
+   Single use facts are a special case of triggering linear facts because once they are derived they are
+   proven to be immediately consumed. The following example shows the only place in the program where
+   the \texttt{a} predicate is used in the body of the rule. Note that no matter what the state of
+   the database is, we can prove that \texttt{a} facts can be used immediately and will work as a function
+   call in imperative languages.
+   
+   \begin{Verbatim}
+   .... -o a(A, 2).
+
+a(A, 1) -o ....
+a(A, 2) -o ....
+a(A, 3) -o ....
+
+   ....
+   \end{Verbatim}
+    
+\end{itemize}
+
+Note that these are only preliminary invariant optimizations. More optimization ideas will appear
+as we look further into our programs and find general patterns.
+
+\subsection{Measurements}
+
+After implementing all the needed optimizations, we want to measure the effect of each optimization
+and relate each program to the optimizations used.
+
+Finally we want to systematically compare \lang execution against execution of the identical programs
+in languages such as C, Python, Haskell and Prolog. While we do not expected to run as fast as C,
+we expect \lang programs to be competitive against Python, Haskell or Prolog.
 
 \section{Coordination \& Programs}
 
-adding more coordination facts and implement at least two more programs that use them.
+We want to implement more programs that use coordination. By implementing new programs we can
+extend the set of coordination directives and find out which action or sensing facts may be
+appropriate in our system. We are specially interested in designing more sensing and action
+facts that place nodes in specific threads to improve data locality.
 
-\section{Proof Based Optimizations}
+A potential algorithm that we can implement is the Alpha-Beta search algorithm. It is a good program
+because we can reduce the search space by prioritizing certain tree branches. It remains to be
+seen if the program can be easily implemented in \lang.
+We intend to measure the execution speedup of these new coordinated programs.
 
-\begin{itemize}
-   \item facts that are used only once
-   \item single facts
-   \item 
-\end{itemize}
+In terms of implementation, our virtual machine ignores action facts for coordination when a fact
+is derived at a node that is located on a different thread. We want to design a new algorithm
+that will efficiently handle such situations so that action facts are taken into account without
+slowing down execution due to thread synchronization.
 
 \section{Planned Schedule}
+
+The proposed work is scheduled on a 18 month timeline ending May 2015.
+
+\begin{itemize}
+   \item \textbf{Spring 2014}
+      
+   Perform the overhead analysis for the currently written \lang programs.
+   Spend some time improving upon the preliminary optimization ideas and implement them.
+
+   Prove the cut-elimination theorem of our linear logic fragment. Baelde's work~\cite{Baelde:2012:LGF:2071368.2071370} will make this easy.
+   
+   \textbf{Checkpoint}: new benchmarks for \lang programs taking into account the new optimizations.
+
+   \item \textbf{Summer 2014}
+   
+   Design a set of invariant optimizations and implement them in the compiler. Meanwhile, benchmark the runtime of programs to see how they improve the execution.
+
+   Writing a few more programs using coordination.
+   Meanwhile extend the set of coordination directives that will help implement the new programs.
+
+   \textbf{Checkpoint}: new benchmarks for \lang programs and their comparison against other implementations.
+   
+   \item \textbf{Fall 2014}
+   
+   Continue working on invariant optimizations.
+   Build website for \lang and the make \lang system publicly available.
+   
+   \textbf{Checkpoint}: The \lang website. Improved benchmark results for \lang programs.
+   
+   \item \textbf{Spring 2015}
+   
+   Write the thesis document.
+   
+   \textbf{Checkpoint}: thesis defense.
+
+\end{itemize}
