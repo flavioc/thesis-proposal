@@ -1,6 +1,6 @@
 In this chapter we want to present some preliminary results of the \lang runtime system.
 Firstly, we want to show that our virtual machine performs well when running multiple threads,
-i.e., it can reasonably schedule the execution of programs to reduce execution time and increase parallel speedup. Secondly, we want to show that by using coordination directives, programs perform faster.
+i.e., it can reasonably schedule the execution of programs to reduce execution time and increase parallel speedup. Secondly, we want to show that by using coordination directives, programs can perform faster.
 Finally, we want to show that our programs are usually shorter than programs written in other languages.  
 
 In our experimental setup, we used a machine with
@@ -14,12 +14,12 @@ four AMD Six-Core Opteron TM 8425 HE (2100 MHz) chips (24 cores) and 64 GB of DD
 For the parallel results, we run each program using 1, 2, 4, 6, 8, 10, 12, 14 and 16 threads and compared the runtime against the execution of the sequential version of the virtual machine. We used the following programs:
 
 \begin{description}
-   \item[greedy graph coloring]: In this program, we attempt to color each node of a graph so that no two adjacent nodes have the same color. We start with 15 colors and expand the number of colors when we cannot color the graph.
-   \item[pagerank]: The asynchronous PageRank algorithm without synchronization between iterations. Every time a node sends a new rank to its neighbors and the change was significant, the neighbors are scheduled to recompute their ranks.
-   \item[N queens]: Already explained before. We use an 11x11 board.
+   \item[Greedy Graph Coloring (GGC)] in this program, we attempt to color each node of a graph so that no two adjacent nodes have the same color. We start with a small number of colors and then we expand the number of colors when we cannot color the graph.
+   \item[PageRank] implements an asynchronous PageRank algorithm without synchronization between iterations. Every time a node sends a new rank to its neighbors and the change was significant, the neighbors are scheduled to recompute their ranks.
+   \item[N queens] already explained before. We use an 11x11 board.
 \end{description}
 
-In Fig.~\ref{exp:graph_coloring} we present the speedup results for the graph coloring program. In the first plot, we show the speedup for a graph of 12000 webpages. Since this dataset follows the power law, that is, there is a small number of pages with a lots of links (1\% of the nodes have 75\% of the edges), the speedup is not as good as the one shown when using a random dataset of 2000 nodes, where each node has more or less the same number of links. In the weather web graph 20\% of the nodes have 75\% of the edges, much less than the search engine dataset, and it shows in the results.
+Figure~\ref{exp:graph_coloring} presents the speedup results for the GGC program using 3 different datasets. In the first plot, we show the speedup for a graph of 12,000 webpages. Since this dataset follows the power law, that is, there is a small number of pages with a lots of links (1\% of the nodes have 75\% of the edges), the speedup is not as good as the one shown when using a random dataset of 2,000 nodes, where each node has more or less the same number of links. In the weather graph 20\% of the nodes have 75\% of the edges, much less than the search engine dataset, and that shows in the results.
 
 \newcommand{\figsize}[0]{6.5cm}
 
@@ -27,17 +27,17 @@ In Fig.~\ref{exp:graph_coloring} we present the speedup results for the graph co
    \centering
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_greedy-graph-coloring-search_engines.pdf}
-      \caption{Using a search engine web graph (almost 12000 nodes).}
+      \caption{Search engine, a graph of web pages collected from a search engine (around 12,000 nodes).}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_greedy-graph-coloring-weather.pdf}
-      \caption{Using a weather web graph (around 8000 nodes).}
+      \caption{Weather, a graph of web pages collected from weather sites (around 8000 nodes).}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_greedy-graph-coloring-2000.pdf}
-      \caption{Using a random graph (with 2000 nodes).}
+      \caption{Using a random graph (with 2,000 nodes).}
    \end{subfigure}
-   \caption{Experimental results for the greedy graph coloring algorithm.}
+   \caption{Experimental results for the greedy GGC algorithm.}
    \label{exp:graph_coloring}
 \end{figure*}
 
@@ -45,22 +45,22 @@ In Fig.~\ref{exp:graph_coloring} we present the speedup results for the graph co
    \centering
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_pagerank-search_engines.pdf}
-      \caption{Using a search engine web graph (almost 12000 nodes)}
+      \caption{Search engine, a graph of web pages collected from a search engine (around 12,000 nodes)}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_pagerank-movies.pdf}
-      \caption{Using a movie web graph (almost 8000 nodes).}
+      \caption{Movie, a graph of web pages collected from movie sites (around 8,000 nodes).}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_pagerank-500.pdf}
-      \caption{Using a random, dense graph (500 nodes).}
+      \caption{Using a random, dense graph (with 500 nodes).}
    \end{subfigure}
    \caption{Experimental results for the asynchronous PageRank algorithm.}
    \label{exp:pagerank}
 \end{figure*}
 
-The PageRank results are shown in Fig.~\ref{exp:pagerank}. We have used the same web graph dataset as before and a new dataset representing movie websites \footnote{Both the search engine and movie web graphs were retrieved from \url{http://www.cs.toronto.edu/~tsap/experiments/download/download.html}}. We notice that the search engine graph dataset is big enough to allow good execution improvements even with 16 threads, while the movie graph, being smaller, shows some scaling problems as the number of threads increases. Even though the web graph follows the power law it does not slowdown execution (it happened in the graph coloring algorithm).
-For the third plot, we used a random graph with about 500 nodes and 75000 edges. Since the graph is so dense, the runtime is capable of exploiting the
+The PageRank results are shown in Fig.~\ref{exp:pagerank}. We have used the same search engine dataset as before and a new dataset representing movie websites \footnote{Both the search engine and movie graphs were retrieved from \url{http://www.cs.toronto.edu/~tsap/experiments/download/download.html}}. We notice that the search engine graph dataset is big enough to allow good execution improvements even with 16 threads, while the movie graph, being smaller, shows some scaling problems as the number of threads increases. Even though the search engine follows the power law it does not slowdown execution (as happened in the GGC program).
+For the third plot, we used a random graph with 500 nodes and 75,000 edges. Since the graph is so dense, the runtime is capable of exploiting the
 available parallelism, resulting in linear scalability.
 
 \begin{figure}[h!]
@@ -70,17 +70,17 @@ available parallelism, resulting in linear scalability.
     \label{exp:8queens}
 \end{figure}
 
-The results for the N queens program are shown in Fig.~\ref{exp:8queens}. This program is much less regular than the other two, since computation starts at the top of the grid and then rolls down, until only the last row is doing computation. Note that as the computation goes from row to row, the number of states increase, creating even more imbalances. This shows that our system is able to scale well with more traditional algorithms such as N Queens.
+The results for the N queens program are shown in Fig.~\ref{exp:8queens}. This program is much less regular than the other two, since computation starts at the top of the grid and then rolls down, until only the last row is doing computation. Note that as the computation goes from row to row, the number of states increase, creating even more imbalances. The results show that our system is able to scale well with more traditional algorithms such as N Queens.
 
 \section{Coordination Experiments}
 
 In our coordination experiments, we are interested in showing that coordination improves the execution time of programs.
-To do this, we are using the following 3 programs:
+To do that, we used the following 3 programs:
 
 \begin{description}
-   \item[heat transfer]: In the heat transfer program, we have a grid of cells that transfer heat with the neighbor cells by taking into account the edge weights. We use a dataset with a square of cells in the center of the grid with very high heat, while the outer cells have low heat. We use coordination to prioritize the neighbors of cells where rapid heat changes happen.
-   \item[shortest path]: We use the SSSP program shown earlier but we extended it to compute the distance to several nodes in order to increase the amount of computation.
-   \item[belief propagation]: This is the program explained in the programs section. We build splash trees to improve performance.
+   \item[Heat Transfer] in the heat transfer program, we have a grid of cells that transfer heat with the neighbor cells by taking into account the edge weights. We use a dataset with a square of cells in the center of the grid with very high heat, while the outer cells have low heat. We use coordination to prioritize the neighbors of cells where rapid heat changes happen.
+   \item[Single Source Shortest Path (SSSP)] we use the SSSP program shown earlier but we extended it to compute the distance to several nodes in order to increase the amount of computation.
+   \item[Belief Propagation (BP)] this is the belief propagation program explained before. We build splash trees to improve performance.
 \end{description}
 
 Fig.~\ref{exp:heat-transfer} shows the results for the heat transfer program. \textbf{Threads} represents the speedup of the multicore execution
@@ -96,13 +96,13 @@ version without priorities.
      \centering
    \begin{subfigure}[b]{0.4\textwidth}
       \includegraphics[width=\textwidth]{speedup_heat-transfer-80.pdf}
-      \caption{Experimental results for the heat transfer program.\newline}\label{exp:heat-transfer}
+      \caption{HT program.\newline}\label{exp:heat-transfer}
    \end{subfigure}
    \begin{subfigure}[b]{0.4\textwidth}
       \includegraphics[width=\textwidth]{speedup_uspowergrid.pdf}
-      \caption{Experimental results for the SSSP program with the US Power Grid dataset when using coordination.}\label{exp:sssp-uspowergrid}
+      \caption{SSSP program with the US Power Grid dataset.}\label{exp:sssp-uspowergrid}
    \end{subfigure}
-   \caption{Heat transfer and SSSP program.}
+   \caption{Experimental results for the HT and SSSP programs when using coordination.}
 \end{figure}
 
 To measure the performance of the SSSP program we used several datasets retrieved from \url{http://toreopsahl.com/datasets}. We computed several
@@ -138,26 +138,26 @@ for the US Power Grid dataset in Fig.~\ref{exp:sssp-uspowergrid} that compares a
 While the previous results were computed using only one thread, we also see good speedups with multiple threads. However, the gains reduce as we add
 more threads because the decision of picking the best path is done at the thread level, thus reducing the opportunities for optimization.
 
-For the belief propagation (BP) program, we have a noisy image made of 400x400 pixels that needs to be denoised.
-To put our implementation to the test, we have also run the GraphLab (version 1) implementation of the same problem. The results are shown
-in Fig.~\ref{exp:splashbp}. The first plot presents the scalability results for the simple belief propagation problem. The GraphLab version
+For the BP program, we have a noisy image made of 400x400 pixels that needs to be denoised.
+To put our implementation in perspective, we have also run the GraphLab (version 1) implementation of the same problem. The results are shown
+in Fig.~\ref{exp:splashbp}. The first plot presents the scalability results for the simple BP problem. The GraphLab version
 uses the \textbf{fifo} scheduler that works identically to the basic \lang scheduler.
 
 \begin{figure*}[ht]
    \centering
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{splash-bp-speedup1_csv.pdf}
-      \caption{Scalability of basic belief propagation.}
+      \caption{Scalability of basic BP.}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{splash-bp-speedup2_csv.pdf}
-      \caption{Scalability of belief propagation with splashes.}
+      \caption{Scalability of BP with splashes.}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{splash-bp-improv_csv.pdf}
       \caption{Coordination improvements by using splashes.}
    \end{subfigure}
-   \caption{Experimental results for belief propagation with coordination using splashes. The dataset is a 400x400 image.}
+   \caption{Experimental results for BP with coordination using splashes. The dataset is a 400x400 image.}
    \label{exp:splashbp}
 \end{figure*}
 
@@ -166,21 +166,21 @@ runs with the extra coordination rules. Again, the scalability lines are very si
 Finally, the last plot (Fig.~\ref{exp:splashbp}~(c)) presents the improvements of the coordinated version over the basic version when using a different
 number of threads. With only 1 thread, we get almost a 5-fold speedup over the version without coordination. We can also see that adding more threads tends to reduce the effectiveness of splash trees in both systems.
 
-Using a small set of action facts and derivation rules we were able to implement complex
-scheduling strategies present in GraphLab, a practical and powerful machine learning
+In summary, using a small set of action facts and derivation rules we were able to implement complex
+scheduling strategies similar to the ones present in GraphLab, a practical and powerful machine learning
 framework.
 
 \section{Language expressiveness and conciseness}
 
-Finally, we attempt to compare the size of \lang programs against implementations of the same
+Finally, we show some results comparing the size of \lang programs against implementations of the same
 programs in other languages. We want to show that \lang programs are more concise and can also be run in parallel from the start.
 
-In table~\ref{tbl:length} we show how \lang programs against programs written in other languages in
-terms of size. SSSP and the C version of N Queens~\cite{8queens-parallel} are sequential implementations and are difficult
-to adapt to run in parallel. Even so, \lang programs are much smaller and in our opinion, easier
+In table~\ref{tbl:length} we show how \lang programs compare against programs written in other languages in
+terms of size. For the SSSP and the C version of N Queens~\cite{8queens-parallel} we are considering sequential implementations
+that are very difficult to parallelize. Even so, \lang programs are much smaller and in our opinion, easier
 to understand. For the N Queens problem, we also included an MPI implementation written in C~\cite{Rolfe:2008:SMA:1473195.1473217}
 that is around 10 times longer than the \lang version. We are currently developing an MPI version
-of the \lang runtime and preliminary results show some good speedups for this program.
+of the \lang runtime and preliminary results, also show some good speedups for this program.
 
 \begin{table}[ht]
 \begin{center}
@@ -226,7 +226,7 @@ to improve these results.
 \section{Summary}
 
 This section gave some evidence to our thesis that \lang programs are concise and scalable. Moreover, we
-also showed that using coordination directives has the potential to improve the execution time
+also showed that coordination directives have potential to improve the execution time
 of programs. Our coordination code is also far shorter than competing systems such as GraphLab, which is
 very promising. However, the \lang runtime system is still not competitive in some areas, specially
 when deriving and consuming a huge number of facts.

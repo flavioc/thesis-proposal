@@ -34,17 +34,19 @@ and how they are related to the \lang syntax.
 \begin{table*}
    \begin{center}
 \resizebox{16cm}{!}{
-    \begin{tabular}{ | l | l | l | l | l |}
+    \begin{tabular}{ | l | l || l | l | l |}
     \hline
-    Connective & Place & \lang Syntax & \lang Example & Description \\ \hline \hline
-    $\emph{fact}(\hat{x})$ & Body or Head & $fact(\hat{x})$ & \texttt{path(A, P)} & Linear facts. \\ \hline
-    $\bang \emph{fact}(\hat{x})$ & Body or Head & $\bang fact(\hat{x})$ & \texttt{$\bang$edge(X, Y, W)} & Persistent facts. \\ \hline
-    $1$ & Head & $1$ & \texttt{1} & Represents rules with an empty head. \\ \hline
-    $A \otimes B$ & Body and Head & $A, B$ & \texttt{path(A, P), edge(A, B, W)} & Connect two expressions. \\ \hline
-    $\forall x. A$ & Rule & Please see $A \lolli B$ & \texttt{path(A, B) $\lolli$ reachable(A, B)} & To represent variables defined inside the rule. \\ \hline
-    $\exists x. A$ & Head & $exists \; \widehat{x}. (B)$ & \texttt{exists A.(path(A, P))} & Instantiates new node variables. \\ \hline
-    $A \lolli B$ & Rule & $A \lolli B$ & \texttt{path(A, B) $\lolli$ reachable(A, B)} & $\lolli$ means "linearly implies". \\& & & & $A$ is the body and $B$ is the head. \\ \hline
-    $\m{def} A. B$ & Head & $\{\; \widehat{x} \; | \; A \; | \; B \; \}$ & \texttt{\{B | !edge(A, B) | visit(B)\}} & Extension called definitions.\\ & & & & Used for comprehensions and aggregates. \\ \hline
+    Connective                   & Description                                      & \lang Syntax                                  & \lang Place     & \lang Example                                  \\ \hline \hline
+    $\emph{fact}(\hat{x})$       & Linear facts.                                    & $fact(\hat{x})$                               & Body or Head    & \texttt{path(A, P)}                            \\ \hline
+    $\bang \emph{fact}(\hat{x})$ & Persistent facts.                                & $\bang fact(\hat{x})$                         & Body or Head    & \texttt{$\bang$edge(X, Y, W)}                  \\ \hline
+    $1$                          & Represents rules with an empty head.             & $1$                                           & Head            & \texttt{1}                                     \\ \hline
+    $A \otimes B$                & Connect two expressions.                         & $A, B$                                        & Body and Head   & \texttt{path(A, P), edge(A, B, W)}             \\ \hline
+    $\forall x. A$               & To represent variables defined inside the rule.  & Please see $A \lolli B$                       & Rule            & \texttt{path(A, B) $\lolli$ reachable(A, B)}   \\ \hline
+    $\exists x. A$               & Instantiates new node variables.                 & $exists \; \widehat{x}. (B)$                  & Head            & \texttt{exists A.(path(A, P))}                 \\ \hline
+    $A \lolli B$                 & $\lolli$ means "linearly implies".               & $A \lolli B$                                  & Rule            & \texttt{path(A, B) $\lolli$ reachable(A, B)}   \\
+                                 & $A$ is the body and $B$ is the head.             &                                               &                 &                                                \\ \hline
+    $\m{def} A. B$               & Extension called definitions.                    & $\{\; \widehat{x} \; | \; A \; | \; B \; \}$  & Head            & \texttt{\{B | !edge(A, B) | visit(B)\}}        \\
+                                 & Used for comprehensions and aggregates.          &                                               &                 &                                                \\ \hline
     \end{tabular}
 }
 \end{center}
@@ -67,7 +69,7 @@ the proof system satisfies cut-elimination which makes it consistent.
 In a comprehension, we want to imply an implication as many times as possible matches we can do
 using the current database. One way to formally describe comprehensions would be to use persistent
 rules that would be used a few times and then would be forgotten. A more reasonable approach is to use
-definitions. Given a comprehension $C$ with a body $A$ and a head $B$, then we can build the following definition:
+definitions. Given a comprehension $C = \{ \; \widehat{x} \; | \; A \; | \; B \; \}$ with a body $A$ and a head $B$, then we can build the following definition:
 
 \[
 \compr{C} \defeq 1 \with ((A \lolli B) \otimes \compr{C})
@@ -77,12 +79,10 @@ We can unfold $\compr{C}$ to either stop (by selecting $1$) or get a new linear 
 to apply the comprehension once. Because we also get another $\compr{C}$ by selecting the right hand side,
 the comprehension can be applied again, recursively.
 
-Aggregates work identically, but they need an extra argument to accumulate the aggregated value.
-If an aggregate $C$ uses the \texttt{sum} operation and has a body $B$ then the definition will be
-as follows:
+Aggregates work identically, but they need an extra argument to accumulate the aggregated value. If a sum aggregate $C$ has the form $[\;\m{sum} \Rightarrow y \; | \; \widehat{x} \; | \; A \; | \; B_1 \; | \; B_2 \;]$, then the definition will be as follows:
 
 \[
-\compr{C} \; V \defeq (\lambda v. B)V \with (\forall x. Ax \lolli \compr{C} \; (x + V))
+\compr{C} \; V \defeq (\lambda v. B_2)V \with (\forall x. Ax \lolli B_1 \otimes \compr{C} \; (x + V))
 \]
 
 The aggregate is initiated as $\compr{C} \; 0$.

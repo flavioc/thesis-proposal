@@ -42,7 +42,7 @@
 	<key>ColumnSpacing</key>
 	<real>36</real>
 	<key>CreationDate</key>
-	<string>2013-11-11 13:09:30 +0000</string>
+	<string>2013-11-10 01:13:44 +0000</string>
 	<key>Creator</key>
 	<string>Flavio Cruz</string>
 	<key>DisplayScale</key>
@@ -53,7 +53,7 @@
 	<array>
 		<dict>
 			<key>Bounds</key>
-			<string>{{375.01004, 150.625}, {39, 32}}</string>
+			<string>{{372.45065, 156.63672}, {39, 32}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -77,7 +77,7 @@
 				<real>18</real>
 			</dict>
 			<key>ID</key>
-			<integer>99</integer>
+			<integer>30</integer>
 			<key>Shape</key>
 			<string>Rectangle</string>
 			<key>Style</key>
@@ -115,7 +115,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{129.99584999999999, 150.625}, {39, 32}}</string>
+			<string>{{124.95886, 152.61328}, {39, 32}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -139,7 +139,7 @@
 				<real>18</real>
 			</dict>
 			<key>ID</key>
-			<integer>98</integer>
+			<integer>29</integer>
 			<key>Shape</key>
 			<string>Rectangle</string>
 			<key>Style</key>
@@ -177,7 +177,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{371.45065, 6.0419922000000001}, {39, 32}}</string>
+			<string>{{372.45065, 10.041992}, {39, 32}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -201,7 +201,7 @@
 				<real>18</real>
 			</dict>
 			<key>ID</key>
-			<integer>97</integer>
+			<integer>28</integer>
 			<key>Shape</key>
 			<string>Rectangle</string>
 			<key>Style</key>
@@ -239,7 +239,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{114.01367, 0}, {39, 32}}</string>
+			<string>{{115.01367, 4}, {39, 32}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -263,7 +263,7 @@
 				<real>18</real>
 			</dict>
 			<key>ID</key>
-			<integer>96</integer>
+			<integer>27</integer>
 			<key>Shape</key>
 			<string>Rectangle</string>
 			<key>Style</key>
@@ -305,14 +305,14 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>91</integer>
+				<integer>6</integer>
 			</dict>
 			<key>ID</key>
-			<integer>95</integer>
+			<integer>10</integer>
 			<key>Points</key>
 			<array>
-				<string>{267.45918102043004, 70.511199489835832}</string>
-				<string>{109.07039632482278, 156.80237352853507}</string>
+				<string>{267.62053656804312, 74.057099684570019}</string>
+				<string>{105.62142037238424, 159.13330642215612}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -333,7 +333,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>89</integer>
+				<integer>4</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -342,14 +342,14 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>90</integer>
+				<integer>5</integer>
 			</dict>
 			<key>ID</key>
-			<integer>94</integer>
+			<integer>9</integer>
 			<key>Points</key>
 			<array>
-				<string>{313.78489837997836, 80.793702002904837}</string>
-				<string>{315.21962485285337, 145.10356795710175}</string>
+				<string>{313.79922504280523, 84.79622271764427}</string>
+				<string>{313.416158751213, 151.11340270499579}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -370,7 +370,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>89</integer>
+				<integer>4</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -379,14 +379,14 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>91</integer>
+				<integer>6</integer>
 			</dict>
 			<key>ID</key>
-			<integer>93</integer>
+			<integer>8</integer>
 			<key>Points</key>
 			<array>
-				<string>{72.007059545688634, 86.851794085372077}</string>
-				<string>{73.22953496198619, 149.12655148545181}</string>
+				<string>{71.378710847022987, 90.851646132194574}</string>
+				<string>{70.177164826280091, 151.11488083953398}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -407,7 +407,7 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>88</integer>
+				<integer>3</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -416,14 +416,14 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>89</integer>
+				<integer>4</integer>
 			</dict>
 			<key>ID</key>
-			<integer>92</integer>
+			<integer>7</integer>
 			<key>Points</key>
 			<array>
-				<string>{124.89846612286951, 45.699218999999999}</string>
-				<string>{248.04293824724803, 45.699218999999999}</string>
+				<string>{125.89846612286951, 49.699218999999999}</string>
+				<string>{249.04293824724803, 49.699218999999999}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -444,12 +444,12 @@
 			<key>Tail</key>
 			<dict>
 				<key>ID</key>
-				<integer>88</integer>
+				<integer>3</integer>
 			</dict>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{24.117187999999999, 150.625}, {99.28125, 50.832031000000001}}</string>
+			<string>{{20, 152.61327999999997}, {99.28125, 50.832031000000001}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FontInfo</key>
@@ -460,7 +460,7 @@
 				<real>10</real>
 			</dict>
 			<key>ID</key>
-			<integer>91</integer>
+			<integer>6</integer>
 			<key>Shape</key>
 			<string>Circle</string>
 			<key>Style</key>
@@ -484,16 +484,12 @@
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs20 \cf0 unvisited(@4).\
-visit(@4).\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
-
-\b \cf0 visit(@4).}</string>
+\f0\fs20 \cf0 unvisited(@4).}</string>
 			</dict>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{266.17944, 146.60156000000001}, {99.28125, 50.832031000000001}}</string>
+			<string>{{263.62006000000002, 152.61328}, {99.28125, 50.832031000000001}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FontInfo</key>
@@ -504,7 +500,7 @@ visit(@4).\
 				<real>10</real>
 			</dict>
 			<key>ID</key>
-			<integer>90</integer>
+			<integer>5</integer>
 			<key>Shape</key>
 			<string>Circle</string>
 			<key>Style</key>
@@ -528,15 +524,12 @@ visit(@4).\
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs20 \cf0 unvisited(@3).\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
-
-\b \cf0 visit(@3).}</string>
+\f0\fs20 \cf0 unvisited(@3).}</string>
 			</dict>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{249.54297, 12.102050999999999}, {126.91797, 67.194336000000007}}</string>
+			<string>{{250.54297, 16.102050999999999}, {126.91797, 67.194336000000007}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FontInfo</key>
@@ -547,7 +540,7 @@ visit(@4).\
 				<real>10</real>
 			</dict>
 			<key>ID</key>
-			<integer>89</integer>
+			<integer>4</integer>
 			<key>Shape</key>
 			<string>Circle</string>
 			<key>Style</key>
@@ -573,14 +566,12 @@ visit(@4).\
 
 \f0\fs20 \cf0 !edge(@2, @3).\
 !edge(@2, @4).\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
-
-\b \cf0 visited(@2).}</string>
+unvisited(@2).}</string>
 			</dict>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{19, 6.0419922000000001}, {104.39843999999999, 79.314453}}</string>
+			<string>{{20, 10.041992}, {104.39843999999999, 79.314453}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FontInfo</key>
@@ -591,7 +582,7 @@ visit(@4).\
 				<real>10</real>
 			</dict>
 			<key>ID</key>
-			<integer>88</integer>
+			<integer>3</integer>
 			<key>Shape</key>
 			<string>Circle</string>
 			<key>Style</key>
@@ -617,7 +608,8 @@ visit(@4).\
 
 \f0\fs20 \cf0 !edge(@1, @2).\
 !edge(@1, @4).\
-visited(@1).}</string>
+unvisited(@1).\
+visit(@1).}</string>
 			</dict>
 		</dict>
 	</array>
@@ -668,7 +660,7 @@ visited(@1).}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2013-11-21 17:41:51 +0000</string>
+	<string>2013-11-21 16:50:13 +0000</string>
 	<key>Modifier</key>
 	<string>Flavio Cruz</string>
 	<key>NotesVisible</key>
@@ -749,7 +741,7 @@ visited(@1).}</string>
 			</dict>
 		</array>
 		<key>Frame</key>
-		<string>{{53, 114}, {694, 764}}</string>
+		<string>{{337, 328}, {693, 495}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
@@ -763,7 +755,7 @@ visited(@1).}</string>
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{0, 0}, {559, 625}}</string>
+		<string>{{0, 0}, {558, 356}}</string>
 		<key>Zoom</key>
 		<real>1</real>
 		<key>ZoomValues</key>

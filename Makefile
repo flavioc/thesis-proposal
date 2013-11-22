@@ -12,7 +12,8 @@ proposal.pdf: proposal.tex	\
 		refs.bib \
 		appendix.tex \
 		statement.tex \
-		related_work.tex
+		related_work.tex \
+		execution_trace1.pdf execution_trace2.pdf execution_trace3.pdf execution_trace4.pdf
 	pdflatex proposal.tex
 	pdflatex proposal.tex
 	bibtex proposal

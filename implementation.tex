@@ -1,34 +1,34 @@
-
 This chapter presents a brief overview of the current implementation of \lang.
-We developed a compiler and a virtual machine that runs
-byte-code. The virtual machine for multicores makes use of the pthreads library.
-
-\section{Overview}
+We developed a compiler that given an \lang program generates \lang byte-code and a virtual machine that runs the byte-code.
+Since the virtual machine makes use of the Pthreads library, the concept of worker explained in Chapter~\ref{chapter:coordination} is thus realized as POSIX thread.
 
 The goal of our system is to keep the threads as busy as possible and to reduce inter-thread communication.
 The load balancing aspect of the system is performed by our work scheduler that is based on a work
 stealing algorithm. More specifically, threads can steal nodes of other threads to keep themselves busy.
-Reduction of inter-thread communication is achieved by using a breadth-first search method to order nodes.
+Reduction of inter-thread communication is achieved by first ordering the node addresses present in the code
+in such a way that closer nodes are clustered together and then partitioning them to threads.
+
+\section{Core Engine}
 
 When the virtual machine starts, it reads the byte-code file and starts all threads.
 As a first step, all threads will grab their nodes and assign the \texttt{owner} property of each node.
-Because only one thread is allowed to do computation on the node at any giving time, this node's property
-defines the thread with such permissions.
-Next, we fill up the \emph{work queue} with the nodes we have picked. This queue
-maintains the nodes that have new facts that need to be processed.
+Because only one thread is allowed to do computation on a node at any giving time, the owner property
+defines the thread with such permission.
+Next, each thread fills up its \emph{work queue} with the nodes picked. This queue
+maintains the nodes that have new facts to be processed.
 
-When a node sends a fact to another node, we need to check if the target node is not in the work queue of the owner thread.
-If both nodes are in different threads, then we have a point of synchronization. At some point,
+When a node sends a fact to another node, we need to check if the target node is in the same work queue of the owner thread.
+When the two nodes are in different threads, then we have a point of synchronization. Eventually,
 there will be no more work to do and the threads will go idle. There is a global atomic counter, a global
 boolean flag and one boolean flag (active/idle) for each thread that are used to detect termination.
 Once a thread goes idle, it decrements the global counter and changes its flag to idle. If the counter
-goes to zero, the global flag is set to idle. Since every thread will be busy-waiting and checking
+reaches zero, the global flag is set to idle. Since every thread will be busy-waiting and checking
 the global flag, they will detect the change and exit the program.
 
-\section{Threads}
+\section{Work Queue}
 
-The work queue is actually implemented as two queues. First, there's one double-linked list for nodes
-with priority equal to 0 called the \emph{normal queue}.
+The work queue is actually implemented as two queues: a \emph{normal queue} and a \emph{priority queue}.
+The normal queue is implemented as a double-linked list and stores the nodes with priority equal to 0.
 We use a double-linked list because it will be easier to move the node from this queue to the
 \emph{priority queue}. The priority queue is an array based binary heap data structure that contains
 all the unprocessed nodes with priority. To reduce the memory footprint of our queues, all the bookkeeping fields
@@ -63,8 +63,6 @@ In Fig.~\ref{fig:node} we present the node data structure and its fields. We sum
 \end{description}
 \end{comment}
 
-\subsection{Work Stealing}
-
 When a thread runs out of nodes to process, it will pick a thread at random and try to steal one node
 from the target thread. The stealer thread will pop a node from either the priority queue or the normal queue. We use locks for mutual exclusion when dealing with those queues. Note that when a
 node is stolen, its owner information also changes to the stealer thread.
@@ -72,17 +70,16 @@ node is stolen, its owner information also changes to the stealer thread.
 It is important to note that whenever a node sends a coordination action fact to a node in another thread, the fact is ignored, due to the costs of sending
 coordination data between threads. We intend to design an efficient mechanism to solve this problem.
 
-In Fig.~\ref{code:work_loop} we present a simplified thread work loop that is executed in all threads. At each work cycle we check if thread has work in one of the two queues and if
-not we attempt to steal a node from the other thread's queues. If our attempts to get some
-work have succeeded, then we process the current node. Otherwise, the thread becomes idle and tries to synchronize and waits for the other threads to finish. Meanwhile, if the thread
-receives some new node, \texttt{synchronize\_termination} will return \texttt{false} and
-the thread will go to the next work cycle.
+In Fig.~\ref{code:work_loop} we present a simplified version of the work loop that is executed in all threads. At each work cycle,
+a thread checks if it has work in one of the two queues and, if not, it attempts to steal a node from the other thread's queues.
+If the attempt succeeds, then it processes the new node. Otherwise, the thread becomes idle and tries to
+synchronize with the other threads to finish. Meanwhile, if the thread receives new work inside
+\texttt{synchronize\_termination}, this function will succeed and the thread will return to the work cycle.
 
 \begin{figure}[h!]
 \small\begin{Verbatim}
 void work_loop(thread_id tid) {
    while (true) {
-      current_node = NULL;
       if(has_work(tid)) {
          current_node = pop_work(tid); // take node from one of the queues
       } else {
@@ -92,10 +89,9 @@ void work_loop(thread_id tid) {
       }
       if(current_node == NULL) {
          become_idle(tid);
-         if(synchronize_termination(tid))
+         if(!synchronize_termination(tid))
             return;
-         else
-            become_active(tid);
+         become_active(tid);
       } else {
          process_node(current_node, tid);
       }
@@ -106,7 +102,16 @@ void work_loop(thread_id tid) {
   \label{code:work_loop}
 \end{figure}
 
-\section{Core Engine}\label{sec:core_engine}
+\section{Database and Core Engine}\label{sec:core_engine}
+
+The database is implemented using several trie data structures. Tries are trees where facts are indexed
+by the common arguments. Because we need to delete facts from the database, we implemented each trie level
+as a double linked list so trie nodes can be easily removed. If a trie level has too many nodes, we
+transform the linked list into a hash table in order to improve lookup.
+
+Each node uses a trie per predicate to store facts. During matching of rules, we build a
+\emph{match object}, which matches some arguments of the target predicate to instantiated values, so
+that by searching the predicate trie from top to bottom, we can easily discard invalid trie branches.
 
 Each node database is separated into two sets,
 the database itself, and the \emph{temporary store}. The temporary store contains facts that have been
@@ -130,17 +135,6 @@ incrementally, that is, we attempt to fire all rules where a persistent fact is 
 the \emph{pipelined semi-naive} evaluation and it originated in the P2 system~\cite{Loo-condie-garofalakis-p2}.
 This evaluation method avoids excessing re-derivations of the same fact. The order of derivation does not matter for those rules, since
 only persistent facts are used.
-
-\section{Database}
-
-The database is implemented using the trie data structure. Tries are trees where facts are indexed
-by the common arguments. Because we need to delete facts from the database, we implement each trie level
-as a double linked list so trie nodes can be easily removed. If a trie level has too many nodes, we
-transform the linked list into a hash table in order to improve lookup.
-
-Each node uses a trie per predicate to store facts. During matching of rules, we build a
-\emph{match object}, which matches some arguments of the target predicate to instantiated values, so
-that by searching the predicate trie from top to bottom, we can easily discard invalid trie branches.
 
 \section{Summary}
 
