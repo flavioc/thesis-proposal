@@ -169,7 +169,7 @@ seen if the program can be easily implemented in \lang.
 We intend to measure the execution speedup of these new coordinated programs.
 
 In terms of implementation, our virtual machine ignores action facts for coordination when a fact
-is derived at a node that is located on a different thread. We want to design a new algorithm
+is exchanged between nodes of different threads. We want to design new mechanisms
 that will efficiently handle such situations so that action facts are taken into account without
 slowing down execution due to thread synchronization.
 

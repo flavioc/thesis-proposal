@@ -31,11 +31,11 @@ Figure~\ref{exp:graph_coloring} presents the speedup results for the GGC program
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_greedy-graph-coloring-weather.pdf}
-      \caption{Weather, a graph of web pages collected from weather sites (around 8000 nodes).}
+      \caption{Weather, a graph of web pages collected from weather sites (around 8000 nodes).\newline}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_greedy-graph-coloring-2000.pdf}
-      \caption{Using a random graph (with 2,000 nodes).}
+      \caption{Using a random graph (with 2,000 nodes).\newline\newline}
    \end{subfigure}
    \caption{Experimental results for the greedy GGC algorithm.}
    \label{exp:graph_coloring}
@@ -49,11 +49,11 @@ Figure~\ref{exp:graph_coloring} presents the speedup results for the GGC program
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_pagerank-movies.pdf}
-      \caption{Movie, a graph of web pages collected from movie sites (around 8,000 nodes).}
+      \caption{Movie, a graph of web pages collected from movie sites (around 8,000 nodes).\newline}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_pagerank-500.pdf}
-      \caption{Using a random, dense graph (with 500 nodes).}
+      \caption{Using a random, dense graph (with 500 nodes).\newline\newline}
    \end{subfigure}
    \caption{Experimental results for the asynchronous PageRank algorithm.}
    \label{exp:pagerank}
@@ -99,7 +99,7 @@ version without priorities.
       \caption{HT program.\newline}\label{exp:heat-transfer}
    \end{subfigure}
    \begin{subfigure}[b]{0.4\textwidth}
-      \includegraphics[width=\textwidth]{speedup_uspowergrid.pdf}
+      \includegraphics[width=\textwidth]{speedup_shortest-uspowergrid.pdf}
       \caption{SSSP program with the US Power Grid dataset.}\label{exp:sssp-uspowergrid}
    \end{subfigure}
    \caption{Experimental results for the HT and SSSP programs when using coordination.}
@@ -114,8 +114,10 @@ These statistics and the speedup (\textbf{Speedup}) when using the coordinated v
 We have tried to understand if there is a correlation between the graph structure and the coordination speedup. We can see that a higher number
 of nodes and edges tends to improve execution. The US Airports dataset stands out because it is a small sized graph where a subset of airports
 (70) have most connections. The other smaller datasets have a much stable distribution.
-Still, the coordinated execution for most datasets is 30\% faster than the regular execution. We also included the speedup plot of the coordinated version
-for the US Power Grid dataset in Fig.~\ref{exp:sssp-uspowergrid} that compares against the sequential execution without coordination.
+Still, the coordinated execution for most datasets is 30\% faster than the regular execution. We also included the speedup plot
+for the US Power Grid dataset in Fig.~\ref{exp:sssp-uspowergrid} that compares the regular version against the coordinated version.
+We note that the coordinated version loses its advantages as the number of threads increase. This may happen because we do not
+use action facts that are sent between nodes in different threads.
 
 \begin{table*}[ht]
 

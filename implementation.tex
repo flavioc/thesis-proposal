@@ -67,9 +67,6 @@ When a thread runs out of nodes to process, it will pick a thread at random and 
 from the target thread. The stealer thread will pop a node from either the priority queue or the normal queue. We use locks for mutual exclusion when dealing with those queues. Note that when a
 node is stolen, its owner information also changes to the stealer thread.
 
-It is important to note that whenever a node sends a coordination action fact to a node in another thread, the fact is ignored, due to the costs of sending
-coordination data between threads. We intend to design an efficient mechanism to solve this problem.
-
 In Fig.~\ref{code:work_loop} we present a simplified version of the work loop that is executed in all threads. At each work cycle,
 a thread checks if it has work in one of the two queues and, if not, it attempts to steal a node from the other thread's queues.
 If the attempt succeeds, then it processes the new node. Otherwise, the thread becomes idle and tries to
@@ -135,6 +132,14 @@ incrementally, that is, we attempt to fire all rules where a persistent fact is 
 the \emph{pipelined semi-naive} evaluation and it originated in the P2 system~\cite{Loo-condie-garofalakis-p2}.
 This evaluation method avoids excessing re-derivations of the same fact. The order of derivation does not matter for those rules, since
 only persistent facts are used.
+
+\section{Coordination}
+
+Action facts used for coordination are derived just like regular facts, however when they need to be sent to the target node
+they are consumed and the corresponding action performed immediately.
+It is important to note that whenever a node sends a coordination action fact to a node in another thread,
+the fact is ignored, due to the costs of sending
+coordination data between threads. We intend to design an efficient mechanism to solve this problem.
 
 \section{Summary}
 
