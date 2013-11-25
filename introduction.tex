@@ -38,13 +38,14 @@ state across the robots and then making the computation local to the node. Becau
 are sets of logical clauses, they are more amenable to proof. Meld, however, gives very little control
 to the programmer since it is heavily declarative.
 
-We propose a new programming language that extends the original Meld with linear logic in
-order to make programs stateful. While the new language retains
+In this proposal, we present a new programming language for parallel programming that extends the
+original Meld with linear logic in order to make programs more stateful. While the new language retains
 the declarative aspects of Meld, it adds explicit programmer control
 due to the introduction of linear logic and the opportunities for optimization that arise with it.
-Since we are interested in executing graph-based algorithms on multicores, Meld is good starting
-point because it uses a graph based model of computation. 
-We next present an overview of the related work including declarative languages, programming models
+We are interested in efficiently executing graph-based algorithms on multicores. Meld is a good
+starting point because it sees a distributed program as a network of processing units, therefore
+there is a naturally mapping to these kinds of algorithms.
+We next give an overview of the related work including declarative languages, programming models
 based on graphs, linear logic and provability.
 
 \section{Related Work}
