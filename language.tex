@@ -13,13 +13,82 @@ exploiting the concurrency in the program.
 
 \section{A taste of \lang}
 
-Figure~\ref{code:visit} presents a complete \lang program that, for a given graph o nodes,
-performs a visit to all nodes reachable from node
-$@1$. We first declare all the predicates (lines 1-4), which represent the kinds of facts we are going to
+\begin{figure}[h!]
+\small\begin{Verbatim}[numbers=left]
+type route edge(node, node).
+type linear message(node, int, list node).
+type linear processed(node, int).
+
+!edge(A, B),
+message(A, Content, [B | L]),
+processed(A, N)
+   -o message(B, Content, L),
+      processed(A, N + 1).
+
+message(A, Content, []),
+processed(A, N)
+   -o processed(A, N + 1).
+
+!edge(@1, @2). !edge(@2, @3). !edge(@3, @4). !edge(@1, @3).
+processed(A, 0).
+message(@1, 42, [@3, @4]).
+\end{Verbatim}
+\caption{Message program.}
+  \label{code:message}
+\end{figure}
+
+In order to show how \lang can be used we present some \lang program examples.
+Our first example presented in Fig.~\ref{code:message} is a message routing program
+that simulates message transmission through a network of nodes.
+We first declare all the predicates (lines 1-3), which represent the kinds of facts we are going to
 use. Predicate \texttt{edge/2} is a non \texttt{linear} (persistent) while all the other predicates are linear.
 Note that \texttt{edge/2} is also a \texttt{route} predicate, where the \texttt{edge} facts are used
-for communication between nodes. Next, we declare the program rules (lines 7-10), followed by the program
-axioms (lines 13-16).
+for communication between nodes. The second argument of the \texttt{message/2} predicate is the message content
+while the third argument is the route list.
+Next, we declare the program rules (lines 5-13),
+followed by the program axioms (lines 14-17).
+
+The first rule (lines 5-9) grabs the next node in the route list (third argument of \texttt{message}) and
+ensures that a communication edge exists (through \texttt{edge(A, B)}). We increase the number of
+processed messages by consuming \texttt{processed(A, N)} and deriving \texttt{processed(A, N + 1)}.
+When the route list is empty, the message has reached its destination and thus it is consumed
+(rule in lines 11-13).
+Note that we only need to send one message since there is only one \texttt{message} axiom (line 17).
+
+In Fig.~\ref{fig:message_trace} we present an execution trace of the message routing program.
+The database is represented as a graph structure where the edges represent the \texttt{edge}
+axioms. We also use the first argument of each fact to partition the database.
+In Fig.~\ref{fig:message_trace}~(a) the database is initialized with the program's axioms. Note that
+the \texttt{message} fact is instantiated at node $@1$. After applying rule 1, we get the database represented
+in Fig.~\ref{fig:message_trace}~(b), where the message has been derived at node $@3$. After applying rule 1 again,
+the message is then routed to node $@4$ (Fig.~\ref{fig:message_trace}~(c)) where it will consumed (Fig.~\ref{fig:message_trace}~(d)).
+
+\begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{0.5\textwidth}
+                \includegraphics[width=\textwidth]{message_trace1}
+                \caption{Initial database.}
+                \label{fig:message_trace1}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[b]{0.5\textwidth}
+                \includegraphics[width=\textwidth]{message_trace2}
+                \caption{After applying rule 1 at node $@1$.}
+                \label{fig:message_trace2}
+        \end{subfigure}\\
+        \begin{subfigure}[b]{0.5\textwidth}
+                \includegraphics[width=\textwidth]{message_trace3}
+                \caption{After applying rule 1 at node $@3$.}
+                \label{fig:message_trace3}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[b]{0.5\textwidth}
+                  \includegraphics[width=\textwidth]{message_trace4}
+                  \caption{After applying rule 2 (nodes $@4$).}
+                  \label{fig:message_trace4}
+          \end{subfigure}
+        \caption{An execution trace for the message program.}\label{fig:message_trace}
+\end{figure}
 
 \begin{figure}[h!]
 \small\begin{Verbatim}[numbers=left]
@@ -45,6 +114,8 @@ visit(@1).
 \end{figure}
 \normalsize
 
+Figure~\ref{code:visit} presents another complete \lang program that, for a given graph
+of nodes, performs a visit to all nodes reachable from node $@1$.
 The first rule of the program (lines 7-8) is fired when a node has a \texttt{visit} and a \texttt{unvisited} fact. When fired, we first derive \texttt{visited} to mark node as \textit{visited} and use a
 \emph{comprehension} construct to go through all the edge facts and derive \texttt{visit} for every
 one of them. This forces those nodes to be visited also. The second rule (line 10) is fired when the
@@ -52,8 +123,6 @@ node is already visited more than once: we keep the \texttt{visited} fact and de
 Node $@1$ starts with the \texttt{visit(@1)} fact (line 16).
 
 Fig.~\ref{fig:exec_trace} shows a possible execution trace for the visit program.
-The database is represented as a graph structure where the edges represent the \texttt{edge}
-axioms. We also use the first argument of each fact to partition the database (Fig.~\ref{fig:exec_trace}(a)).
 After applying the first rule at node $@1$ we get the database in Fig~\ref{fig:exec_trace}~(b).
 Note that node $@1$ is now \texttt{visited} and nodes $@2$
 and $@4$ now have the fact \texttt{visit}. At this point we could either apply rule 1 at
