@@ -82,7 +82,7 @@ the comprehension can be applied again, recursively.
 Aggregates work identically, but they need an extra argument to accumulate the aggregated value. If a sum aggregate $C$ has the form $[\;\m{sum} \Rightarrow y \; | \; \widehat{x} \; | \; A \; | \; B_1 \; | \; B_2 \;]$, then the definition will be as follows:
 
 \[
-\compr{C} \; V \defeq (\lambda v. B_2)V \with (\forall x. Ax \lolli B_1 \otimes \compr{C} \; (x + V))
+\compr{C} \; V \defeq (\lambda v. B_2)V \with (\forall x. ((Ax \lolli B_1) \otimes \compr{C} \; (x + V)))
 \]
 
 The aggregate is initiated as $\compr{C} \; 0$.

@@ -173,6 +173,15 @@ is exchanged between nodes of different threads. We want to design new mechanism
 that will efficiently handle such situations so that action facts are taken into account without
 slowing down execution due to thread synchronization.
 
+\section{Program Correctness}
+
+If the time allows, we also want to write correctness and termination proofs of some of the implemented \lang programs.
+
+Some work has already been done to prove properties of linear logic programs.
+Robert Simmons employed an approach called generative invariants~\cite{simmons:Thesis} to prove that an operational semantics of a programming
+language follows some invariants, namely type preservation. It may be possible to extend such approach to
+prove several invariants about our programs, including correctness invariants.
+
 \section{Planned Schedule}
 
 The proposed work is scheduled on a 18 month timeline ending May 2015.
