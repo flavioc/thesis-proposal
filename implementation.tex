@@ -1,6 +1,6 @@
 This chapter presents a brief overview of the current implementation of \lang.
 We developed a compiler that given an \lang program generates \lang byte-code and a virtual machine that runs the byte-code.
-Since the virtual machine makes use of the Pthreads library, the concept of worker explained in Chapter~\ref{chapter:coordination} is thus realized as POSIX thread.
+Since the virtual machine makes use of the Pthreads library, the concept of worker explained in Chapter~\ref{chapter:coordination} is thus realized as a POSIX thread.
 
 The goal of our system is to keep the threads as busy as possible and to reduce inter-thread communication.
 The load balancing aspect of the system is performed by our work scheduler that is based on a work

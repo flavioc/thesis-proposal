@@ -22,6 +22,8 @@ For the parallel results, we run each program using 1, 2, 4, 6, 8, 10, 12, 14 an
 Figure~\ref{exp:graph_coloring} presents the speedup results for the GGC program using 3 different datasets. In the first plot, we show the speedup for a graph of 12,000 webpages. Since this dataset follows the power law, that is, there is a small number of pages with a lots of links (1\% of the nodes have 75\% of the edges), the speedup is not as good as the one shown when using a random dataset of 2,000 nodes, where each node has more or less the same number of links. In the weather graph 20\% of the nodes have 75\% of the edges, much less than the search engine dataset, and that shows in the results.
 
 \newcommand{\figsize}[0]{6.5cm}
+\captionsetup[sub]{              % The subcaption settings
+       font=scriptsize}
 
 \begin{figure*}[htp]
    \centering
@@ -35,7 +37,7 @@ Figure~\ref{exp:graph_coloring} presents the speedup results for the GGC program
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_greedy-graph-coloring-2000.pdf}
-      \caption{Using a random graph (with 2,000 nodes).\newline\newline}
+      \caption{Using a random graph (with 2,000 nodes).\newline}
    \end{subfigure}
    \caption{Experimental results for the greedy GGC algorithm.}
    \label{exp:graph_coloring}
@@ -53,7 +55,7 @@ Figure~\ref{exp:graph_coloring} presents the speedup results for the GGC program
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{speedup_pagerank-500.pdf}
-      \caption{Using a random, dense graph (with 500 nodes).\newline\newline}
+      \caption{Using a random, dense graph (with 500 nodes).\newline}
    \end{subfigure}
    \caption{Experimental results for the asynchronous PageRank algorithm.}
    \label{exp:pagerank}
@@ -113,7 +115,7 @@ These statistics and the speedup (\textbf{Speedup}) when using the coordinated v
 
 We have tried to understand if there is a correlation between the graph structure and the coordination speedup. We can see that a higher number
 of nodes and edges tends to improve execution. The US Airports dataset stands out because it is a small sized graph where a subset of airports
-(70) have most connections. The other smaller datasets have a much stable distribution.
+(70) have most connections. The other smaller datasets have a much uniform distribution.
 Still, the coordinated execution for most datasets is 30\% faster than the regular execution. We also included the speedup plot
 for the US Power Grid dataset in Fig.~\ref{exp:sssp-uspowergrid} that compares the regular version against the coordinated version.
 We note that the coordinated version loses its advantages as the number of threads increase. This may happen because we do not

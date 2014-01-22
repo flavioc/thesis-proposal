@@ -1,5 +1,5 @@
 
-In this chapter we propose a research roadmap that will allows to fully establish the validity of our thesis.
+In this chapter we propose a research roadmap that will allow us to fully establish the validity of our thesis.
 Our experimental results have shown promising results, although this still some work to be done to make
 \lang more usable in real world applications.
 
@@ -13,7 +13,7 @@ languages such as C or Prolog, \lang is still not very competitive since it is m
 
 Although compiled \lang programs are byte-code interpreted, which is a natural
 source of overhead, we think this is still the best architecture for our system and the overhead
-is on the naïve compilation of programs. \lang programs can take advantage of the fact that
+is on the na\"{\i}ve compilation of programs. \lang programs can take advantage of the fact that
 \lang is logic-based language and thus it is possible to optimize and simplify the execution of rules
 if we prove that facts follow certain properties and constraints.
 
@@ -70,11 +70,11 @@ After doing the previous analysis for each \lang program, we intend to try diffe
 \begin{itemize}
    \item \textbf{Improve database indexing}
    
-   Sometimes we need to search for facts where the second argument is a constant. It would be better to put the second argument at the top of trie in order to prune the most branches as soon as possible. We intend to employ a smarter compilation strategy, where we re-order the body of a rule to increase the number of such constraints and give information to the runtime system of the optimal ordering the the trie.
+   Sometimes we need to search for facts where the second argument is a constant. It would be better to put the second argument at the top of trie in order to prune the most branches as soon as possible. We intend to employ a smarter compilation strategy, where we re-order the body of a rule to increase the number of such constraints and give information to the runtime system of the optimal ordering of the trie.
    
    \item \textbf{Improve temporary store}
    
-   Currently the temporary store is just a simple linked list. We also need to look into the temporary store when rules are executed. If the temporary store is heavily used (which we think it is) we want to use an improve data structure.
+   Currently the temporary store is just a simple linked list. We also need to look into the temporary store when rules are executed. If the temporary store is heavily used (which we think it is) we want to use an improved data structure.
    
    \item \textbf{Experiment other data structures for the database}
    
@@ -154,7 +154,9 @@ and relate each program to the optimizations used.
 
 Finally we want to systematically compare \lang execution against execution of the identical programs
 in languages such as C, Python, Haskell and Prolog. While we do not expected to run as fast as C,
-we expect \lang programs to be competitive against Python, Haskell or Prolog.
+we expect \lang programs to be competitive against Python, Haskell and Prolog. This is very important, since
+if the sequential execution is competitive enough, then running the program in parallel will easily
+beat such systems.
 
 \section{Coordination \& Programs}
 
@@ -208,7 +210,7 @@ The proposed work is scheduled on a 18 month timeline ending May 2015.
    \item \textbf{Fall 2014}
    
    Continue working on invariant optimizations.
-   Build website for \lang and the make \lang system publicly available.
+   Build website for \lang and then make \lang publicly available.
    
    \textbf{Checkpoint}: The \lang website. Improved benchmark results for \lang programs.
    

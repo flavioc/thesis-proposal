@@ -27,7 +27,7 @@ of the language. First, we will present the subset of linear logic from which \l
 \lang differs greatly from other Datalog-like languages due to the use of linear logic~\cite{Girard95logic:its}. Traditional forward-chaining logic programming languages make only use of classical logic, in which derived facts are true forever. Many ad-hoc extensions~\cite{Liu98extendingdatalog,Ludascher95alogical} have been devised in the past to support state updates in Datalog, but most are extra-logical which makes it harder to reason about programs.
 \lang uses linear logic as its foundation, therefore state updates are completely natural to the language.
 
-We use a small subset of the original linear logic proof along with an extension for definitions to improve
+We use a small subset of the original linear logic proof system along with an extension for definitions to improve
 the expressiveness of the language. We summarize the connectives used in Table~\ref{table:linear}
 and how they are related to the \lang syntax.
 
@@ -56,17 +56,17 @@ and how they are related to the \lang syntax.
 
 The sequent calculus for our linear logic fragment is shown in Fig.~\ref{linear_logic}.
 The sequent has the form $\Psi ; \seqnocut{\Gamma}{\Delta}{C}$, where $\Psi$ is the typed
-term context used in the quantifiers, $\Gamma$ is the multi-set of persistent facts, $\Delta$
-is the multi-set of linear facts and $C$ is the term we want to prove.
+term context used in the quantifiers, $\Gamma$ is the multi-set of persistent terms, $\Delta$
+is the multi-set of linear terms and $C$ is the term we want to prove.
 
 Most connectives in our fragment are standard and well known, except for the $\compr{A}$ connective. This
 connective is a definition that can be unfolded recursively and is used to logically justify
 comprehensions and aggregates. We took inspiration from Baelde's work on least and greatest fixed points
 in linear logic~\cite{Baelde:2012:LGF:2071368.2071370}. Baelde's system goes beyond simple recursive
-definitions and allows proofs using induction and co-induction proofs in linear logic. Fortunately,
+definitions and allows proofs using induction and co-induction in linear logic. Fortunately,
 the proof system satisfies cut-elimination which makes it consistent. 
 
-In a comprehension, we want to imply an implication as many times as possible matches we can do
+In a comprehension, we want to apply an implication as many times as possible matches we can do
 using the current database. One way to formally describe comprehensions would be to use persistent
 rules that would be used a few times and then would be forgotten. A more reasonable approach is to use
 definitions. Given a comprehension $C = \{ \; \widehat{x} \; | \; A \; | \; B \; \}$ with a body $A$ and a head $B$, then we can build the following definition:
@@ -199,7 +199,7 @@ type $\emph{fact}(\hat{x})$ do not have the argument $\hat{x}$.
 Starting from the linear logic fragment presented earlier, we consider $\Gamma$ and $\Delta$ the database
 of our program. $\Gamma$ contains the database of persistent facts while $\Delta$ the database of linear
 facts. We assume that the rules of the program are persistent linear implications of the form
-$\bang (A \lolli B)$, that can be used several times. However, we do not put the rules in the $\Gamma$
+$\bang (A \lolli B)$ that can be used several times. However, we do not put the rules in the $\Gamma$
 context but in a separate context $\Phi$.
 
 The main idea of the dynamic semantics is to mostly ignore the right side of the sequent calculus
@@ -219,7 +219,7 @@ non-deterministically.
 
 The judgment $\az \Gamma ; \Delta ; A \lolli B \rightarrow \Xi'; \Delta'; \Gamma'$ will attempt to apply
 the derivation rule $A \lolli B$. To do this, it splits the $\Delta$ context into two, namely the
-set of linear resources consumed to match the body of the rule and the remaining facts. Again the
+set of linear resources consumed to match the body of the rule and the remaining facts. Again, the
 set of resources needed to match the body of the rule is guessed. The low level dynamic semantics will
 handle this.
 
@@ -364,7 +364,7 @@ The frame contains enough state to resume the matching process at the time of it
 to select the next candidate fact from the database.
 
 If at some point we cannot match a fact template due to a wrong choice that happened earlier on,
-we need to backtrack (judgment $\cont$ or $\contc$). Since we keep all the continuation frames in a continuation stack,
+we need to backtrack (judgment $\m{cont}$ or $\m{contc}$). Since we keep all the continuation frames in a continuation stack,
 we grab the top frame and select the next fact candidate to complete the matching process.
 If all candidates are exhausted, we pop the current frame and try the next one.
 
@@ -381,7 +381,7 @@ Linear frames have the form $(\Delta; \Delta_{next}; p; \Omega; \Xi; \Lambda; \U
 
 \begin{enumerate}
    \item[$\Delta$] Contains all the linear resources available at this choice point minus the other facts that can used to match $p$ (they are in $\Delta_{next}$).
-   \item[$\Delta_{next}$] The available options to match fact $p$ if the matching fails. When backtracking, we move one fact from $\Delta_{next}$ in $\Delta$.
+   \item[$\Delta_{next}$] The available options to match fact $p$ if the matching fails. When backtracking, we move one fact from $\Delta_{next}$ into $\Delta$.
    \item[$p$] The fact template that created this frame.
    \item[$\Omega$] Ordered list with the remaining terms we have to match to complete the matching process.
    \item[$\Xi$] Multi-set of consumed linear facts up to this choice point.
@@ -432,9 +432,8 @@ it easier to detect where the first linear frame is by just removing every frame
 \section{Soundness Proof}
 
 The soundness theorem proves that if a rule was successfully derived in the low level semantics
-then it can also be successfully derived in the high level semantics. The inverse theorem, the
-completeness proof, cannot be proven correct because the low level semantics lack the non-determinism
-of the high level semantics.
+then it can also be successfully derived in the high level semantics. The completeness theorem cannot
+be proven correct because the low level semantics lack the non-determinism of the high level semantics.
 
 The first main lemma of the soundness proof proves that if we can match the body
 of a rule at the low level then we can also match the rule in the high level system using the same database.
@@ -467,7 +466,7 @@ body of a rule, we need to prove that the derivation process (through judgments 
 sound. This lemma is as follows:
 
 \begin{lemma}[Derivation]
-   If $\do \Gamma; \Delta; \Xi; \Gamma_1; \Delta_1; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$ then $\dz \Gamma; \Delta; \Gamma_1; \Delta_1; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$.
+   If the low level derivation $\do \Gamma; \Delta; \Xi; \Gamma_1; \Delta_1; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$ is true then the high level derivation $\dz \Gamma; \Delta; \Gamma_1; \Delta_1; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$ is also true.
 \end{lemma}
 \begin{proof}
    Straightforward use of induction on $\Omega$ except for the sub-case of comprehensions and aggregates, where we need to use the comprehension and aggregate theorems to construct the derivation tree using $n$ applications of the corresponding construct.
@@ -476,7 +475,7 @@ sound. This lemma is as follows:
 In the case of proving the soundness of comprehensions, we use a very identical theorem to the one used
 to prove the body match soundness. However, in this case we need to reuse the continuation stack several
 times (as many as many comprehensions can be applied). Using induction on the continuation stack, we get
-$n$ (where $n \ge 0$) applications of the comprehension and $n \; \m{match}$ and $n \m{derive}$ judgments
+$n$ (where $n \ge 0$) applications of the comprehension and $n \; \m{match}$ and $n \; \m{derive}$ judgments
 that can be used to rebuild the derivation tree at the low level by using the $\dz \with L$, $\dz \with R$
 and $\dz \lolli$ rules to fold and unfold the comprehension term. The theorem for aggregates works similarly.
 

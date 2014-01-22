@@ -78,9 +78,10 @@ take advantage of them.
 
 The Single Source Shortest Path (SSSP) is a graph algorithm where we want to compute the
 distance of all nodes to a single node. The full code is presented in Fig.~\ref{code:shortest_path_program}.
-The graph is represented using the \texttt{edge(A, B, W)} predicate (line 1), where $A \rightarrow B$ is a directed edge
-from node $A$ to $B$ with distance $W$. The second
-predicate is \texttt{path(A, D, F)} (line 2), where \texttt{D} is the distance of node \texttt{A} to our initial node and \texttt{F}
+The graph is represented using the \texttt{edge(A,~B,~W)} predicate (line 1), where
+\texttt{A} $\rightarrow$ \texttt{B} is a directed edge from node \texttt{A} to \texttt{B}
+with distance \texttt{W}. The second predicate is \texttt{path(A,~D,~F)} (line 2), where
+\texttt{D} is the distance of node \texttt{A} to our initial node and \texttt{F}
 indicates if this path has been processed.
 
 Every node may have several \texttt{path} facts. From this set of facts, the node will select
@@ -89,13 +90,13 @@ When a path is used for propagation, we make sure that the path flag is \texttt{
 because we do not want to propagate the same distance twice. When the rule is fired, the flag
 then changes to \texttt{used} (line 19).
 
-We start with the axiom \texttt{path(startnode, 0, notused)} in line 9 (the distance to the starting node is 0).
-This will kickstart the computation by propagating the initial distance to the neighbor nodes using
-rule 3. We also use 2 coordination directives:
+We start with the axiom \texttt{path(startnode,~0,~notused)} in line 9 (the distance to the starting
+node is \texttt{0}). This will kickstart the computation by propagating the initial distance to the
+neighbor nodes using rule 3. We also use 2 coordination directives:
 
 \begin{itemize}
-   \item \texttt{priority @order asc}: paths are picked in ascending order (line 4).
-   \item \texttt{set-priority(B, D + W)}: to change the node's priority upon the computation of
+   \item \texttt{priority~@order~asc}: paths are picked in ascending order (line 4).
+   \item \texttt{set-priority(B,~D~+~W)}: to change the node's priority upon the computation of
 a new distance (line 18).
 \end{itemize}
 
@@ -134,11 +135,11 @@ path(A, D, notused)
 \subsection{Splash BP}
 
 Loopy Belief Propagation~\cite{Murphy99loopybelief} (LBP) is an approximate inference algorithm
-used in graphical models with cycles. In its essence LBP is a sum-product message passing algorithm
+used in graphical models with cycles. In its essence, LBP is a sum-product message passing algorithm
 where nodes exchange messages with their immediate neighbors and apply some computations to the messages
 received.
 
-LBP is an algorithm that maps very well to the \lang model. In its original form, we need to compute
+LBP is an algorithm that maps very well to the graph based model of LM. In its original form, we need to compute
 the belief of all nodes for several iterations and also synchronize after each iteration.
 However, it is still possible to apply
 some optimizations in order to take advantage of the fact that LBP will converge even when using
@@ -214,7 +215,7 @@ second-phase(A, [A, B | Next], Back)
    -o update(A), waiting(Back), *underline{schedule-next(B)},
       second-phase(B, [B | Next], A).
 \end{Verbatim}
-  \caption{Coordination code for the Splash Belief Propagation.}
+  \caption{Coordination code for the Splash Belief Propagation program.}
   \label{code:sbp}
 \end{figure}
 \normalsize

@@ -1,17 +1,17 @@
 
-Linear Meld (\lang) is a \emph{forward chaining} logic programming language in the style of Datalog~\cite{Ullman:1990:PDK:533142}. The program is defined as a \emph{database of facts} and a set of \emph{derivation rules}.
+Linear Meld (LM) is a \emph{forward chaining} logic programming language in the style of Datalog~\cite{Ullman:1990:PDK:533142}. The program is defined as a \emph{database of facts} and a set of \emph{derivation rules}.
 Initially, we populate the database with the program's axioms and then determine which derivation rules can be applied by using the current database. Once a rule is applied, we derive new facts, which are then added to the database.
 If a rule uses linear facts, they are consumed and thus deleted from the database.
 The program stops when we reach \emph{quiescence}, that is, when we can no longer
-apply any derivation rule.
+apply any derivation rules.
 
 The database of facts can be seen as a graph data structure where each node contains a
 fraction of the database.
 Because the derivation rules can only manipulate facts belonging to
 a node, we are able to perform independent rule derivations at the node level, thus
-exploiting the concurrency in the program.
+exploiting concurrency in the program.
 
-\section{A taste of \lang}
+\section{A taste of LM}
 
 \begin{figure}[h!]
 \small\begin{Verbatim}[numbers=left]
@@ -37,7 +37,7 @@ message(@1, 42, [@3, @4]).
   \label{code:message}
 \end{figure}
 
-In order to show how \lang can be used, we present some \lang program examples.
+In order to show how LM can be used, we present some LM program examples.
 Our first example shown in Fig.~\ref{code:message} is a message routing program
 that simulates message transmission through a network of nodes.
 We first declare all the predicates (lines 1-3), which represent the kinds of facts we are going to
@@ -49,8 +49,8 @@ Next, we declare the program rules (lines 5-13),
 followed by the program axioms (lines 14-17).
 
 The first rule (lines 5-9) grabs the next node in the route list (third argument of \texttt{message}) and
-ensures that a communication edge exists (through \texttt{edge(A, B)}). We increase the number of
-processed messages by consuming \texttt{processed(A, N)} and deriving \texttt{processed(A, N + 1)}.
+ensures that a communication edge exists (through \texttt{edge(A,~B)}). We increase the number of
+processed messages by consuming \texttt{processed(A,~N)} and deriving \texttt{processed(A,~N~+~1)}.
 When the route list is empty, the message has reached its destination and thus it is consumed
 (rule in lines 11-13).
 Note that we only need to send one message since there is only one \texttt{message} axiom (line 17).
@@ -61,7 +61,7 @@ axioms. We also use the first argument of each fact to partition the database.
 In Fig.~\ref{fig:message_trace}~(a) the database is initialized with the program's axioms. Note that
 the \texttt{message} fact is instantiated at node $@1$. After applying rule 1, we get the database represented
 in Fig.~\ref{fig:message_trace}~(b), where the message has been derived at node $@3$. After applying rule 1 again,
-the message is then routed to node $@4$ (Fig.~\ref{fig:message_trace}~(c)) where it will consumed (Fig.~\ref{fig:message_trace}~(d)).
+the message is then routed to node $@4$ (Fig.~\ref{fig:message_trace}~(c)) where it will be consumed (Fig.~\ref{fig:message_trace}~(d)).
 
 \begin{figure}[h]
         \centering
@@ -114,7 +114,7 @@ visit(@1).
 \end{figure}
 \normalsize
 
-Figure~\ref{code:visit} presents another complete \lang program that, for a given graph
+Figure~\ref{code:visit} presents another complete LM program that, for a given graph
 of nodes, performs a visit to all nodes reachable from node $@1$.
 The first rule of the program (lines 7-8) is fired when a node has a \texttt{visit} and a \texttt{unvisited} fact. When fired, we first derive \texttt{visited} to mark node as \textit{visited} and use a
 \emph{comprehension} construct to go through all the edge facts and derive \texttt{visit} for every
@@ -180,7 +180,7 @@ apply the rules.
   Body Expressions & $BE$ & $::=$ & $L \; | \; P \; | \; C \; | \; BE, BE \; | \; \forall_{\widehat{x}}. BE \; | \; \exists_{\widehat{x}}. BE \; | \; 1$\\
   Comprehensions & $CE$ & $::=$ & $\{ \; \widehat{x} \; | \; BE \; | \; HE \; \}$ \\
   Aggregates & $AE$ & $::=$ & $[\;\m{aop} \Rightarrow y \; | \; \widehat{x} \; | \; BE \; | \; HE_1 \; | \; HE_2 \;]$ \\
-  Exists constructor & $EE$ & $::=$ & $exists \; \widehat{x}. (HE)$ \\
+  Exists constructs & $EE$ & $::=$ & $exists \; \widehat{x}. (HE)$ \\
   Head Expressions & $HE$ & $::=$ & $A \; | \; L \; | \; P \; | \; HE, HE \; | \; EE \; | \; CE \; | \; AE \; | \; 1$\\
   Rules & $R$ & $::=$ & $BE \lolli HE \; | \; [\; \m{sop} \Rightarrow y \; | \; BE \;] \lolli HE$ \\
   Set Of Rules & $\Sigma$ & $::=$ & $\cdot \; | \; \Sigma, R$\\
@@ -188,15 +188,15 @@ apply the rules.
   Known Persistent Facts & $\Gamma$ & $::=$ & $\cdot \; | \; \Gamma, \bang p(\hat{t})$ \\
   Database & $D$ & $::=$ & $\Gamma; \Delta$ \\
 \end{tabular}
-\caption{Abstract syntax of \lang.}\label{tbl:ast}
+\caption{Abstract syntax of LM.}\label{tbl:ast}
 \end{table}
 
 \renewcommand{\arraystretch}{1.0}
 
-Table~\ref{tbl:ast} shows the abstract syntax for rules in \lang.
-A \lang program consists of a set of derivation rules ($\Sigma$) and a database ($D$).
+Table~\ref{tbl:ast} shows the abstract syntax for rules in LM.
+A LM program consists of a set of derivation rules ($\Sigma$) and a database ($D$).
 Each derivation rule can be written as $BE \lolli HE$ where $BE$ is the body of a rule and
-$HE$ is the head. Rules without bodies are allowed in \lang and they are called \textit{axioms} (lines 13-16 in Fig.~\ref{code:visit}). Rules without heads are also allowed.
+$HE$ is the head. Rules without bodies are allowed in LM and they are called \textit{axioms} (lines 13-16 in Fig.~\ref{code:visit}). Rules without heads are also allowed.
 
 The body of the rule ($BE$) contains \emph{fact expressions} ($L$ and $P$) and
 constraints ($C$). Fact expressions are template facts that instantiate variables
@@ -210,7 +210,7 @@ may use all the variables instantiated in the body.
 
 \subsection{Predicates and Facts}
 
-Each fact is an association between a \emph{predicate} and a tuple of values. A predicate is a pair with a name and a tuple of types (the argument types). \lang rules are type-checked using the predicate declarations in the header of the program. \lang has a simple type system that includes the following simples types: \emph{node}, \emph{int}, \emph{float}, \emph{string}, \emph{bool}. Recursive types such as \emph{list X} and \emph{pair X; Y} are
+Each fact is an association between a \emph{predicate} and a tuple of values. A predicate is a pair with a name and a tuple of types (the argument types). LM rules are type-checked using the predicate declarations in the header of the program. LM has a simple type system that includes the following simples types: \emph{node}, \emph{int}, \emph{float}, \emph{string}, \emph{bool}. Recursive types such as \emph{list X} and \emph{pair X; Y} are
 also allowed.
 
 \subsection{Comprehensions}
@@ -228,11 +228,11 @@ available in the database and for each combination we derive \texttt{visit(B)}.
 \subsection{Aggregates}
 
 Another useful feature in logic programs is the ability to reduce several facts into a single fact.
-In \lang we have aggregates ($AE$), a special kind of sub-rule that work very similarly to comprehensions.
+In LM we have aggregates ($AE$), a special kind of sub-rule that works very similarly to comprehensions.
 In the abstract syntax $[\;\m{aop} \Rightarrow y \; | \; \widehat{x} \; | \; BE \; | \; HE_1 \; |
 \; HE_2 \;]$, $\m{aop}$ is the aggregate operation, $\widehat{x}$ is the list of variables
 introduced in $BE$, $HE_1$ and $HE_2$ and $y$ is the variable in the body
-$BE$ that represents the values to be aggregated using $\m{aop}$. Like for comprehensions,
+$BE$ that represents the values to be aggregated using $\m{aop}$. Like comprehensions,
 we use $\widehat{x}$ to try all the combinations of $BE$, but, in addition to deriving $HE_1$ for each combination,
 we aggregate the values represented by $y$ and derive $HE_2$ only once using $y$.
 
@@ -243,15 +243,13 @@ price(@1, 3).
 price(@1, 4).
 price(@1, 5).
 count-prices(@1).
-count-prices(A) -o [:sum => P | | price(A, P) | total(A, P)].
+count-prices(A) -o [:sum => P | price(A, P) | | total(A, P)].
 \end{Verbatim}
 
-By applying the rule, we will consume \texttt{count-prices(@1)} and
-derive the aggregate. The aggregate will consume all the \texttt{price(@1, P)} facts,
-sum all the $P$'s and derive \texttt{total(@1,~12)} since \texttt{P~=~12}.
-Note that $HE_1$ was not included in this example (empty by default).
-
-\lang provides several aggregate operations, including the minimum, maximum, sum, and count.
+By applying the rule, we consume \texttt{count-prices(@1)} and
+derive the aggregate which consumes all the \texttt{price(@1, P)} facts.
+These are summed and \texttt{total(@1,~12)} is derived since \texttt{P~=~12}.  
+LM provides several aggregate operations, including the minimum, maximum, sum, and count.
 
 \subsection{Selectors}
 
@@ -261,7 +259,7 @@ efficiency reasons, sometimes it is important to sort facts by one of the argume
 because linearity imposes commitment during rule derivation. The abstract syntax for
 this construct is $[\; \m{sop} \Rightarrow y \; | \; BE \;] \lolli HE$, where
 $\m{sop}$ is the selection operation and $y$ is the variable in the body $BE$ that
-represents the value to be selected accordingly to $\m{sop}$.
+represents the value to be selected according to $\m{sop}$.
 An example using concrete syntax is as follows:
 
 \begin{Verbatim}
@@ -270,13 +268,13 @@ An example using concrete syntax is as follows:
 \end{Verbatim}
 
 In this case, we will order the \texttt{weight} facts by $W$ in ascending order and then try
-to match them. Other operations available are $max$ and $random$ (to force no pre-defined order at the
+to match them. Other operations available are \texttt{max} and \texttt{random} (to force no pre-defined order at the
 implementation level).
 
-\subsection{Exists Constructors}
+\subsection{Exists Constructs}
 
 Exist constructs ($EE$) are based on the linear logic construct of the same name and are used to create new node addresses. We can use the new address to instantiate new facts for the new node.  
-The following example illustrates the use of the exists constructor, where we derive
+The following example illustrates the use of the exists construct, where we derive
 \texttt{perform-work} at a new node \texttt{B}.
 
 \begin{Verbatim}
@@ -285,7 +283,7 @@ The following example illustrates the use of the exists constructor, where we de
 
 \section{Types of Facts}
 
-Beyond the distinction between linear and persistent facts, \lang further classifies facts
+Beyond the distinction between linear and persistent facts, LM further classifies facts
 into 4 categories: \emph{computation} facts, \emph{structural} facts, \emph{sensing} facts
 and \emph{action} facts. Predicates are also classified accordingly.
 
@@ -306,7 +304,7 @@ neighborhood status, etc.
 
 Action facts are linear facts which are consumed when the corresponding action is performed.
 In the original Meld, they were used to make the robots perform actions in the outside world.
-For \lang we use them to change information about the program state
+For LM we use them to change information about the program state
 in the user interface. For example, when we want to change the color of nodes or the label
 of edges, we just derive a new action fact and the action is performed in the interface.
 A more important use of action facts is to change the order in which nodes
@@ -318,29 +316,23 @@ state of the runtime system and then apply decisions in order to improve executi
 In some situations, this set of rules can be added to the program without any modifications
 to the original rules.
 
-
 \section{Operational Semantics}
 
-
-The first argument of every predicate must be typed as a \emph{node}. The node represents a vertex in the graph data structure.
-Essentially, a program can be seen as a graph data structure where processors do computation at the node/vertex level. Computation is
-parallelized by processing many nodes concurrently. With the use of structural facts,
-nodes are able to exchange facts between them.
-
+The first argument of every predicate must be typed as a \emph{node}.
 For distribution and data partitioning purposes, derivation rules are constrained by the expressions that can be written in the body.
 The body of every rule can only refer to facts in the same node.
 However, the expressions in the head may refer to other nodes, as long as those nodes are instantiated in the body of the rule.
-The database of the program can then be partitioned by the first argument of each fact. This is possible since the rules of the
-program only make use of facts from a single node.
+The database of the program can then be partitioned by the first argument of each fact. 
 We drew some inspiration from the Linda system~\cite{1663305}, where the tuple space contains the data and is used by the processors
 to communicate and do computation.
 This differs from imperative languages, since in those languages data and computation are two separate entities.
 
 The execution is performed at the node level and can happen non-deterministically (i.e., any node can
 be picked to run). This means that the programmer cannot expect
-that facts coming from other nodes will be considered as a whole or partially.
+that facts coming from other nodes will be considered as a whole or partially since the process is non-deterministic.
+Under these restrictions, computation can then be parallelized by processing many nodes concurrently.
 
-Each rule in \lang has a defined priority that is inferred from its position in the source file.
+Each rule in LM has a defined priority that is inferred from its position in the source file.
 Rules at the beginning of the file have higher priority. At the node level, we consider all
 the new facts that have been not consider before to create a set of \emph{candidate rules}.
 The set of candidate rules is then applied (by priority) and updated as new facts are derived or consumed.
@@ -348,10 +340,10 @@ Section~\ref{sec:core_engine} gives details in how our implementation manages th
 
 \section{Programs}
 
-In this section, we present several \lang programs in order to show that they tend to be concise and
+In this section, we present several LM programs in order to show that they tend to be concise and
 easy to write. We also want to make clear how the language facilities can be used to solve more
 complicated algorithms, including the quick-sort algorithm that at the first glance does not seem
-to fit in the \lang paradigm.
+to fit the graph based paradigm of LM.
 
 \subsection{Bipartiteness Checking}
 
@@ -363,7 +355,7 @@ instantiated at node \texttt{@1} (line 9) in order to color this node with color
 If a node is \texttt{unchecked} and needs to be marked with a color \texttt{P} then the rule in
 lines 11-12 is applied. We consume the \texttt{unchecked} fact and derive a \texttt{checked(A, P)}
 to effectively color the node with \texttt{P}. We also derive \texttt{visit(B, next(P))} in
-our neighbor nodes in order to color them with the other color.
+neighbor nodes to color them with the other color.
 
 The coloring can fail if a node is already colored with a color \texttt{P} and needs to be colored
 with a different color (line 15) or if it has already failed (line 16).
@@ -404,16 +396,17 @@ The states are represented as a list of integers, where each integer is the colu
 the queen was placed. For example $[2, 0]$ means that a queen is placed in square $(0, 0)$ and another in square $(1, 2)$.
 
 An empty state is instantiated in the top-left node and is then propagated to all nodes in the same row.
-Every node will then check if a queen can be placed on such square. If true, each node will send the new
-state to the row below.
+Every node will then check if a queen can be placed on such square. If true, each node will send at most
+two new states to the row below, one to the first non-diagonal column to the left and another to the column
+in the right.
 Recursively, when a node receives a new state, it will (i) send the state to the left
-and to the right and (ii) try to place the queen in its square. With this method,
+or to the right and (ii) try to place the queen in its square. With this method,
 all states will be computed since we have facts for each valid state
-at that point. When a square cannot place a queen, that state is deleted.
-When the program ends, the states will be placed in the bottom row.
+at that point. When a suare cannot place a queen, that state is deleted.
+When the program ends, all valid states will be placed in the bottom row.
 
-We find our solution very elegant, since it can be easily executed in parallel and there are no
-wasted computations, because any distinct placement will be computed only once.
+We find our solution very elegant, since it can be easily executed in parallel and is an uncommon
+approach to this problem.
 
 \begin{comment}
 \begin{figure}[h!]
@@ -506,19 +499,19 @@ To split the list, we pick a pivot element and put the items that are smaller th
 into the first sublist and items greater than the pivot into the second list.
 
 The quick-sort algorithm is interesting because it does not map immediately to the graph-based
-model of \lang. Our approach considers that the program starts with a single node where
+model of LM. Our approach considers that the program starts with a single node where
 the initial list is located. Then we split the list as usual and create two nodes
 that will recursively sort the sublists. Interestingly, this will create a tree
 that will look similar to a call tree in a functional language.
 
-Fig.~\ref{code:quicksort} presents the code for the quick-sort algorithm in \lang.
+Fig.~\ref{code:quicksort} presents the code for the quick-sort algorithm in LM.
 For each sublist to sort, we start with a \texttt{down} fact that must be (eventually)
 transformed into an \texttt{up} fact, where the sublist in the \texttt{up} fact is sorted.
 In line 11 we start with the initial list at node \texttt{@0}. Lines 13-16 will immediately
 sort the list when the number of items is very small. Otherwise, we apply the rule in line 17.
 \texttt{buildpivot} will first split the list using the pivot \texttt{X} using rules in
 lines 23-26. When there is nothing more to split, we apply the rule in lines 19-21
-that uses an exist constructor create nodes \texttt{B} and \texttt{C}. The sublists
+that uses an exist construct to create nodes \texttt{B} and \texttt{C}. The sublists
 are then sent to these nodes using \texttt{down} facts. Note, however, that we also
 derive \texttt{back} facts, that will be used to send the sorted list back using the rule
 in line 40.
@@ -578,7 +571,7 @@ up(A, L), back(A, B) -o sorted(B, A, L).
 
 \section{Summary}
 
-In this chapter we gave an overview of the \lang language, including its syntax and operational semantics.
-We also explained how to write programs using all the facilities provided by \lang, including
-linear facts and comprehensions. Since \lang uses implicit parallelism, programs can be run in parallel
+In this chapter we gave an overview of the LM language, including its syntax and operational semantics.
+We also explained how to write programs using all the facilities provided by LM, including
+linear facts and comprehensions. Since LM uses implicit parallelism, programs can be run in parallel
 in multicore architectures without any modification.
