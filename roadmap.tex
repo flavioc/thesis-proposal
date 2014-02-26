@@ -22,6 +22,11 @@ database operations such as matching and fetching sets of candidate facts.
 However, some programs such as N Queens are very computationally expensive since they have
 a lot of list manipulation operations.
 
+Finally, there is still some work to be done in terms of scalability. We need to understand how
+threads communicate in the system and how that can be improved, specially in node stealing and load balancing.
+We also need to improve how coordination information can be better utilized between threads and to reduce the costs
+of scheduling and coordination.
+
 \subsection{Overhead Analysis}
 
 To better understand the sources of overhead of our virtual machine, we propose doing a series
@@ -33,21 +38,9 @@ items:
    
    Measure the time spent fetching or searching facts from the database.
    
-   \item \textbf{Database insertion operations}
+   \item \textbf{Database insertion/removal operations}
    
-   Measure the time spent inserting facts into the database.
-   
-   \item \textbf{Database removal operations}
-   
-   Measure the time spent removing facts from the trie.
-   
-   \item \textbf{Temporary store operations}
-   
-   Measure the time looking for facts in the temporary store.
-   
-   \item \textbf{Rule engine}
-   
-   Measure the time spent calculating which rules must be scheduled to run and the time for managing the priority queue of rules.
+   Measure the time spent inserting and removing facts into the database.
    
    \item \textbf{Rule measurement}
    
@@ -60,6 +53,10 @@ items:
    \item \textbf{Communication overhead}
    
    Measure the communication overhead between threads.
+
+   \item \textbf{Priority information}
+
+   Collect information about the use of coordination directives and their effect on the runtime in terms of number of facts proved and rules derived.
    
 \end{itemize}
 
@@ -68,25 +65,29 @@ items:
 After doing the previous analysis for each \lang program, we intend to try different VM optimizations, namely.
 
 \begin{itemize}
-   \item \textbf{Improve database indexing}
-   
-   Sometimes we need to search for facts where the second argument is a constant. It would be better to put the second argument at the top of trie in order to prune the most branches as soon as possible. We intend to employ a smarter compilation strategy, where we re-order the body of a rule to increase the number of such constraints and give information to the runtime system of the optimal ordering of the trie.
-   
    \item \textbf{Improve temporary store}
    
-   Currently the temporary store is just a simple linked list. We also need to look into the temporary store when rules are executed. If the temporary store is heavily used (which we think it is) we want to use an improved data structure.
+   Currently the temporary store is just a simple linked list. Since we also look into the temporary store during rule execution, this data structure may be not be optimal and needs to be revamped.
    
-   \item \textbf{Experiment other data structures for the database}
+   \item \textbf{Improve database indexing}
    
-   Although the trie is good general data structure, it may not be optimal for certain types of predicates. For example, if a predicate has only one argument it may be best to just use a simple array, where each array position is the value of the argument. We should improve the runtime if the number of such facts is small.
-   
+   Sometimes we need to search for facts where some argument is equal to a constant value. This is problematic when the number of facts is too large. While tries solve this problem to a certain degree, they are not the most appropriate data structure because facts are stored in a fixed order. Moreover, some facts need to be looked using different arguments which requires a tradeoff between memory usage and search time. A potential solution is to dynamically decide which argument should be indexed in order to provide the most performance gains.
+
+We also intend to employ a smarter compilation strategy, where we re-order the body of a rule to increase the number of useful join constraints.
+
+   \item \textbf{Improve removal of facts from the database}
+
+   This is related to the two previous points. Because are system relies on removal of facts, storage and indexing need to take this into account so that removal remains fast.
+
    \item \textbf{Reduce communication overhead between nodes}
    
    When a thread needs to send a fact to another node that is located on that same thread, there is a certain overhead because we assume that other threads will also perform the same operation. We want to improve this by using specialized operations for nodes in the same thread. However, we need to pay attention to the use of work stealing since nodes sometimes are moved between threads.
-   
-   \item \textbf{Improve removal of facts from the database}
 
-   If a fact needs to be removed from the database, we simply remove the corresponding branch from the trie. However, if the same fact is derived later on and asserted into the database, it is potentially better to not remove the trie nodes but keep them for later use.
+   \item \textbf{Reduce coordination costs}
+
+   Currently, we use an heap data structure to manage nodes with priorities. This data structure is not the most scalable since it is difficult to parallelize its operations and
+   the current implementation ignores coordination directives that are requested in different threads.
+   A more scalable approach is the skip list data structure~\cite{Sundell:2005:FLC:1073765.1073770}.
    
    \item \textbf{JIT compilation of computation heavy rules}
    
@@ -95,9 +96,8 @@ After doing the previous analysis for each \lang program, we intend to try diffe
 
 \subsection{Invariant Optimizations}
 
-While the previous optimizations will probably yield some good improvements, we think that the biggest
-improvements can be reached by using invariant optimizations. By this, we mean proving certain
-properties about the program and its facts and then compiling the program accordingly.
+The sequential execution of LM programs can be further improved by using invariant optimizations.
+By this, we mean proving certain properties about the program and its facts and then compiling the program accordingly.
 
 \begin{itemize}
    
@@ -147,6 +147,22 @@ a(A, 3) -o ....
 Note that these are only preliminary invariant optimizations. More optimization ideas will appear
 as we look further into our programs and find general patterns.
 
+\subsection{Improved parallelism}
+
+While the current virtual machine shows good scalability, there is still room for improvement.
+
+Firstly, it should be possible for other threads to immediatelly update the set of candidate rules when a fact
+is sent to a node in another thread. This will increase data locality and reduce overall execution time.
+
+Secondly, we are currently ignoring coordination information that is sent to nodes in other threads.
+This tends to reduce the effects of coordination since an increasing number of
+coordination facts are being ignored when more threads are added to the system. We need to design an efficient mechanism that allows sharing of coordination
+information between threads. A direct approach is to allow other threads to concurrently manage the priority queue of nodes
+of other threads. This will require efficient synchronization in order to reduce the keep the costs of coordination low.
+
+Finally, there is a plenty of small improvements that can be made in the node stealing algorithm in order to
+get a slightly better scalability.
+
 \subsection{Measurements}
 
 After implementing all the needed optimizations, we want to measure the effect of each optimization
@@ -155,7 +171,7 @@ and relate each program to the optimizations used.
 Finally we want to systematically compare \lang execution against execution of the identical programs
 in languages such as C, Python, Haskell and Prolog. While we do not expected to run as fast as C,
 we expect \lang programs to be competitive against Python, Haskell and Prolog. This is very important, since
-if the sequential execution is competitive enough, then running the program in parallel will easily
+if the sequential execution is competitive enough, then running the program in parallel will
 beat such systems.
 
 \section{Coordination \& Programs}
@@ -191,11 +207,9 @@ The proposed work is scheduled on a 18 month timeline ending May 2015.
 \begin{itemize}
    \item \textbf{Spring 2014}
       
-   Perform the overhead analysis for the current set of \lang programs.
+   Perform the overhead and scalability analysis for the current set of \lang programs.
    Spend some time improving upon the preliminary optimization ideas and implement them.
 
-   Prove the cut-elimination theorem of our linear logic fragment. Baelde's work~\cite{Baelde:2012:LGF:2071368.2071370} will make this easy.
-   
    \textbf{Checkpoint}: new benchmarks for \lang programs taking into account the new optimizations.
 
    \item \textbf{Summer 2014}
@@ -209,7 +223,7 @@ The proposed work is scheduled on a 18 month timeline ending May 2015.
    
    \item \textbf{Fall 2014}
    
-   Continue working on invariant optimizations.
+   Continue working on invariant optimizations and scalability optimizations.
    Build website for \lang and then make \lang publicly available.
    
    \textbf{Checkpoint}: The \lang website. Improved benchmark results for \lang programs.
@@ -221,3 +235,4 @@ The proposed work is scheduled on a 18 month timeline ending May 2015.
    \textbf{Checkpoint}: thesis defense.
 
 \end{itemize}
+
