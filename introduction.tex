@@ -31,12 +31,16 @@ While those declarative paradigms tend to make programs easier to reason about, 
 little or no control to the programmer for expressing or managing parallel execution
 which may result in suboptimal performance.
 
-In the context of the Claytronics project~\cite{goldstein-computer05}, Ashley-Rollman et al~\cite{ashley-rollman-iclp09, ashley-rollman-derosa-iros07wksp} have created
-Meld, a logic programming language suited to program massively distributed systems made of modular robots
-with a dynamic topology. The distribution of computation is done by first partitioning the program
+In the context of the Claytronics project~\cite{goldstein-computer05}, Ashley-Rollman et
+al~\cite{ashley-rollman-iclp09, ashley-rollman-derosa-iros07wksp} have created Meld, a logic programming language suited to
+program massively distributed systems made of modular robots with a dynamic topology. The distribution of computation is done
+by first partitioning the program
 state across the robots and then making the computation local to the node. Because Meld programs
-are sets of logical clauses, they are more amenable to proof. Meld, however, gives very little control
-to the programmer since it is heavily declarative.
+are sets of logical clauses, they are more amenable to proof.
+
+However, Meld and other declarative programming models give very little control to the programmer since they are heavily declarative.
+This is a clear disadvantage against lower-level abstractions, since its difficult to change how programs are scheduled by
+the runtime system and how the system manages parallelism.
 
 In this proposal, we present a new programming language for parallel programming that extends the
 original Meld with linear logic in order to make programs more stateful. While the new language retains
@@ -46,7 +50,7 @@ We are interested in efficiently executing graph-based algorithms on multicores.
 starting point because it sees a distributed program as a network of processing units, therefore
 there is a naturally mapping to these kinds of algorithms.
 We next give an overview of the related work including declarative languages, programming models
-based on graphs, linear logic and provability.
+based on graphs, linear logic, coordination and provability.
 
 \section{Related Work}
 
