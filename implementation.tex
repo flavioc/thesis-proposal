@@ -141,11 +141,48 @@ It is important to note that whenever a node sends a coordination action fact to
 the fact is ignored, due to the costs of sending
 coordination data between threads. We intend to design an efficient mechanism to solve this problem.
 
+\section{Other Implementations}
+
+We also have preliminary implementations of LM that run on other distributed systems.
+We have a version of LM that runs on traditional clusters and employs MPI~\cite{gabriel04-open-mpi} for communication
+and distribution. Additionally, we have a version that runs on Blinky Blocks~\cite{Kirby-chi11}, a physical distributed system
+made of cubes that communicate with each other and can be re-arranged manually by the user.
+
+All these other systems use the same virtual machine core to rule rules and maintain the database. However, they are significantly different
+when it comes to data partitioning, communication and parallelism.
+
+\subsection{MPI Implementation}
+
+The current MPI implementation is similar to the multicore implementation with a few important distinctions. First, since there is no shared
+memory between MPI processes residing at different machines, the global database is stored separately such that each process contains a subset
+of the underlying graph model.
+
+Communication is more costly since facts must be serialized at the source machine and then deserialized
+at the target machine in order to be processed. To increase throughput, facts are buffered and sent only when there is enough of them.
+The send operation is done asynchronously to allow the source process to continue its computation while communication happens in the background.
+After a while, once we confirm that the facts have been received and the processes become idle, the Dijkstra-Safra's~\cite{safras87} algorithm
+is used in order to detect program termination.
+
+In our preliminary version, the node partitioning is static since there is no work stealing once the initial nodes are assigned to processes.
+Moving a node to another machine may be too prohibitive if the node database is too big.
+ 
+\subsection{Blinky Blocks Implementation}
+
+Since the Blinky Blocks~\cite{Kirby-chi11} is a physical distributed system, it has very different requirements when compared to the multicore
+or the MPI version. First, each blinky block is a processing unit and naturally will be mapped to a single node. Communication is also restricted
+to the immediate neighbors that can be attached to the six faces of the cube.
+
+Each blinky block can also sense and actuate on the outside world. For instance, the blinky block can sense a tap and then immediately instantiate
+a new sensing fact that will be used in the program's rules. In terms of actuators, the blocks can emit light using the builtin LED's.
+This allows the running program to interactively present its results in real-time.
+
+We also have a simulated version of the Blinky Blocks system which is implemented as a simulator that displays the physical system and
+communicates with a LM virtual machine that runs the blocks. In exchange, the virtual machine provides all the actions that must be performed
+on the simulator.
+
 \section{Summary}
 
-This section provided a very brief overview of the current implementation of \lang. Although the parallel
-and load balancing facilities of the runtime system are mostly completed, there is still some
-implementation work to be done at the core engine level in order to make execution faster.
-As it will be explained in Chapter~\ref{chapter:exp}, \lang is not yet competitive against
-other systems, therefore we intend to perform more implementation work as part of this
-thesis to make the virtual machine as fast as possible.
+This section provided a very brief overview of the current implementation of \lang. Although the parallel and load balancing facilities of the
+runtime system are mostly completed, there is still some implementation work to be done at the core engine level in order to make execution faster.
+As it will be explained in Chapter~\ref{chapter:exp}, \lang is not yet competitive against other systems, therefore we intend to perform more
+implementation work as part of this thesis to make the virtual machine as fast as possible.
