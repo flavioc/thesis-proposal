@@ -18,9 +18,9 @@ in other declarative languages.
    We divide the logical facts across all the nodes of the graph. Since the
    logical rules only make use of data local to a node, computation can be performed at the
    node level, disregarding the other nodes of the graph. We envision the program as
-   a graph data structure where each processing unit performs work on a different subset of the graph,
-   thus creating parallelism. Communication between processing units only happens when nodes send data
-   to nodes in other units.
+   a communicating graph data structure where each processing unit performs work on a different subset of the graph,
+   thus creating parallelism. This is an advantage of LM since we can run programs on many different types
+   of distributed systems as long as the underlying runtime system uses the appropriate communication facilities.
    
    \item Linear Logic (mostly done)
 
