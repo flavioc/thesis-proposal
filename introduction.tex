@@ -33,9 +33,9 @@ which may result in suboptimal performance.
 
 In the context of the Claytronics project~\cite{goldstein-computer05}, Ashley-Rollman et
 al~\cite{ashley-rollman-iclp09, ashley-rollman-derosa-iros07wksp} have created Meld, a logic programming language suited to
-program massively distributed systems made of modular robots with a dynamic topology. The distribution of computation is done
-by first partitioning the program
-state across the robots and then making the computation local to the node. Because Meld programs
+program massively distributed systems made of modular robots with a dynamic topology. Meld programs can derive actions that are used
+to make the robots act on the outside world. The distribution of computation is done
+by first partitioning the program state across the robots and then making the computation local to the node. Because Meld programs
 are sets of logical clauses, they are more amenable to proof.
 
 However, Meld and other declarative programming models give very little control to the programmer since they are heavily declarative.
@@ -43,9 +43,11 @@ This is a clear disadvantage against lower-level abstractions, since its difficu
 the runtime system and how the system manages parallelism.
 
 In this proposal, we present a new programming language for parallel programming that extends the
-original Meld with linear logic in order to make programs more stateful. While the new language retains
-the declarative aspects of Meld, it adds explicit programmer control
+original Meld with linear logic in order to make programs more stateful. Linear logic gives the language a structured
+way to manage state, allowing the programmer to derive and delete logical facts.
+While the new language retains the declarative aspects of Meld, it adds explicit programmer control
 due to the introduction of linear logic and the opportunities for optimization that arise with it.
+
 We are interested in efficiently executing graph-based algorithms on multicores. Meld is a good
 starting point because it sees a distributed program as a network of processing units, therefore
 there is a naturally mapping to these kinds of algorithms.

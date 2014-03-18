@@ -48,6 +48,21 @@ in many areas of computing such as programming languages, game semantics, concur
 Due to the resource interpretation of the logic, linear logic presents a good basis for programming
 languages that allow state manipulation.
 
+In the context of the Curry-Howard correspondence~\cite{howard:tfatnoc}, linear logic has been applied in programming languages
+as a mechanism to implement \emph{linear types}. Linear types or also sometimes known as \emph{uniqueness types} are types
+that force objects to be used exactly once. Surprisingly, such types add mutable state to functional languages because they enforce
+a linear view of state, allowing the language to naturally support concurrency, input/output and data structure's updates.
+Arguably, the most popular language that features uniqueness types is the Clean programming language~\cite{JFP:1349748}.
+Monads~\cite{Wadler:1997:DI:262009.262011}, made popular with the Haskell programming language, are another interesting way to add state
+to functional languages. While monads tend to be more powerful than linear types, they also ensure equational reasoning in the presence
+of mutable data structures and I/O effects.
+
+As we will see in the next chapters of this proposal, linear logic programming is a different approach than either monads or linear types.
+While the latter are mechanisms that enhance functional programming with state, the former uses state as a foundation, since
+the program's database is both the state and the program, since it drives the computation forward through rule application. However, our
+new language can also interact with the outside world through sensing and action facts, which are special facts that return information
+about the world and act on the outside world, respectively.
+
 \subsection{Coordination}
 
 FIXME
@@ -77,8 +92,11 @@ the system.
 Mobile UNITY transforms UNITY by adding locations to processes and removing the
 nondeterministic aspect from local processes. Processes could then communicate or move
 between locations.
-\begin{comment}
-Because \lang also uses locations (as nodes),
-we believe that it may be possible to express \lang programs in Mobile UNITY but
-we haven't look deeply into it.
-\end{comment}
+
+Since the original Meld is based on logic programming, it has been used to produce proofs of correctness.
+Meld program code is amenable to mechanized analysis via theorem checkers such as Twelf~\cite{twelf},
+a logic system designed for analyzing program logics and logic program implementations.
+For instance, a meta-module based shape planner program was proven to be correct~\cite{dewey-iros08,ashley-rollman-iclp09}
+under the assumption that actions derived by the program are always successfully applied in the outside world.
+While the fault tolerance aspect is lax, the planner will always reach the target shape in finite time.
+The sketch of the proof is presented in Dewey et al~\cite{dewey-iros08}.
