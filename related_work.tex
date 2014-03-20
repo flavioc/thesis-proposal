@@ -1,3 +1,6 @@
+We next give an overview of the related work including declarative languages, programming models
+based on graphs, linear logic, coordination and provability.
+
 \subsection{Declarative Programming}
 
 Many programming models have been developed in order to make parallel programs both easier to write and reason about. The most famous examples of such paradigms are \emph{logic programming} and \emph{functional programming}.
@@ -59,13 +62,45 @@ of mutable data structures and I/O effects.
 
 As we will see in the next chapters of this proposal, linear logic programming is a different approach than either monads or linear types.
 While the latter are mechanisms that enhance functional programming with state, the former uses state as a foundation, since
-the program's database is both the state and the program, since it drives the computation forward through rule application. However, our
+the program's database is both the state and the program, because it drives the computation forward through rule application. However, our
 new language can also interact with the outside world through sensing and action facts, which are special facts that return information
 about the world and act on the outside world, respectively.
 
 \subsection{Coordination}
 
-FIXME
+Many programming languages follow what is called the coordination paradigm~\cite{Papadopoulos98coordinationmodels}. This form of distributed
+programming divides execution in two parts: computation, where the actual computation is performed, and
+coordination, which deals with communication and cooperation between processing units. This paradigm attempts to clearly distinguish between
+these two parts by providing abstractions for coordination in an attempt to provide architecture and system-independent forms of communication.
+
+We can identify two main types of coordination models:
+
+\begin{description}
+   \item[Data-Driven:] In a data-driven model,
+the state of the computation depends on both the data being received or transmitted by the processes and the current configuration
+of the coordinated processes. The coordinated process is not only responsible for reading and manipulating the data but is also
+responsible for coordinating itself and/or other processes. Each process must intermix the coordination directives provided by the coordination
+model with the computation code. While these directives have a very clear interface, it is in the programmer's responsibility to use them correctly.
+
+   \item[Task-Driven:] In this model, the coordination code is more cleanly separated from the computation code. While in data-driven models, the content of the data exchanged by the processes will affect how the processes coordinate with each other, in a task-driven model, the process behavior depends only on the coordination patterns that are setup before hand. This means that the computation component is defined as a black box and there are clearly defined interfaces for input/output. These interfaces are usually defined as a full-fledged coordination language and not as
+   simple directives present in the data-driven models.
+\end{description}
+
+Linda~\cite{linda} is probably the most famous coordination model. Linda implements a data-driven coordination model
+and features a \emph{tuple space} that can be manipulated using the following coordination directives: \texttt{out(t)}
+writes a tuple \texttt{t} into the tuple space; \texttt{in(t)} reads a tuple using the template \texttt{t}; \texttt{rd(t)} retrieves
+a copy of the tuple \texttt{t} from the tuple space; and \texttt{eval(p)} puts a process \texttt{p} in the tuple space and executes it in parallel.
+Linda processes do not need to know the identity of other processes because processes only communicate through the tuple space.
+Linda can be implemented on top of many popular languages by simply creating a communication and storage mechanism for the tuple space
+and then adding the directives as a language library.
+
+The original Meld~\cite{ashley-rollman-iclp09} can also be seen as a kind of data-driven coordination language. The important distinction is that
+in Meld there's no explicit coordination directives. When Meld rules are activated they may derive facts that need to be sent to a neighboring robot. In turn, this will activate computation on the neighbor. Robot communication is implemented by \emph{localizing} the program rules
+and then by creating \emph{communication rules}.
+
+The proposed LM language also implements communication rules, however it goes further because
+some facts, action facts, can change how the processing units schedule nodes to be executed, namely, which node is to be computed next, which may in turn change
+the program's final result. This result in a more complete inter-play between coordination code and data.
 
 \subsection{Provability}
 
