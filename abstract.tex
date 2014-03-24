@@ -3,8 +3,8 @@
 Parallel programs are known to be difficult to write and reason about. Programs written in low level parallel constructs commonly available in imperative programming languages tend to be problematic to understand and debug. Declarative programming is a step in the right direction because it moves the details of parallelization from the programmer to the runtime system.
 However, these paradigms tend to remove most scheduling decisions from the programmer resulting in few opportunities for optimization.
 
-We propose a declarative logic programming language called Linear Meld that is suited to run graph-based programs.
-Although Linear Meld is declarative and runs in parallel it also solves the problem of programmer control by introducing coordination directives.
+We propose a declarative logic programming language called Linear Meld that is suited to run graph-based programs in parallel.
+Although Linear Meld is declarative, it also solves the problem of programmer control by introducing coordination directives.
 The foundation of our language is linear logic, a powerful logical system where logical facts can be asserted and removed. Linear logic gives the language a structured
 way to manage state while remaining fully declarative. We envision the program as a communicating graph data structure where each processing unit performs work on a different subset of the graph. Logical rules are constrained to facts in the local node so that computation happens locally.
 
