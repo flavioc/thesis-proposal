@@ -13,66 +13,58 @@ four AMD Six-Core Opteron TM 8425 HE (2100 MHz) chips (24 cores) and 64 GB of DD
 
 For the parallel results, we run each program using 1, 2, 4, 6, 8, 10, 12, 14 and 16 threads and compared the runtime against the execution of the sequential version of the virtual machine. We used the following programs:
 
-\begin{description}
-   \item[Greedy Graph Coloring (GGC)] in this program, we attempt to color each node of a graph so that no two adjacent nodes have the same color. We start with a small number of colors and then we expand the number of colors when we cannot color the graph.
-   \item[PageRank] implements an asynchronous PageRank algorithm without synchronization between iterations. Every time a node sends a new rank to its neighbors and the change was significant, the neighbors are scheduled to recompute their ranks.
-   \item[N queens] already explained before. We use an 11x11 board.
-\end{description}
-
-Figure~\ref{exp:graph_coloring} presents the speedup results for the GGC program using 3 different datasets. In the first plot, we show the speedup for a graph of 12,000 webpages. Since this dataset follows the power law, that is, there is a small number of pages with a lots of links (1\% of the nodes have 75\% of the edges), the speedup is not as good as the one shown when using a random dataset of 2,000 nodes, where each node has more or less the same number of links. In the weather graph 20\% of the nodes have 75\% of the edges, much less than the search engine dataset, and that shows in the results.
-
 \newcommand{\figsize}[0]{6.5cm}
 \captionsetup[sub]{              % The subcaption settings
        font=scriptsize}
 
-\begin{figure*}[htp]
+\begin{description}
+   \item[Greedy Graph Coloring (GGC)] in this program, we attempt to color each node of a graph so that no two adjacent nodes have the same color. We start with a small number of colors and then we expand the number of colors when we cannot color the graph.
+   \item[PageRank] implements an asynchronous PageRank algorithm without synchronization between iterations. Every time a node sends a new rank to its neighbors and the change was significant, the neighbors are scheduled to recompute their ranks.
+   \item[N queens] already explained before. We use an 13x13 board.
+\end{description}
+
+Figure~\ref{exp:graph_coloring} presents the speedup results for the GGC program using 2 different datasets. In the first plot, we show the speedup for a graph of 12,000 webpages. Since this dataset follows the power law, that is, there is a small number of pages with a lots of links (1\% of the nodes have 75\% of the edges), the speedup is slightly worse than the one shown when using a random dataset of 2,000 nodes, where each node has more or less the same number of links.
+
+
+\begin{figure*}[hp]
    \centering
-   \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{speedup_greedy-graph-coloring-search_engines.pdf}
+   \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{new-benchmarks/speedup_greedy-graph-coloring-search_engines.pdf}
       \caption{Search engine, a graph of web pages collected from a search engine (around 12,000 nodes).}
    \end{subfigure}
-   \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{speedup_greedy-graph-coloring-weather.pdf}
-      \caption{Weather, a graph of web pages collected from weather sites (around 8000 nodes).\newline}
-   \end{subfigure}
-   \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{speedup_greedy-graph-coloring-2000.pdf}
-      \caption{Using a random graph (with 2,000 nodes).\newline}
+   \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{new-benchmarks/speedup_greedy-graph-coloring-2000.pdf}
+      \caption{Using a random graph with 2,000 nodes.\newline}
    \end{subfigure}
    \caption{Experimental results for the greedy GGC algorithm.}
    \label{exp:graph_coloring}
 \end{figure*}
 
-\begin{figure*}[htp]
+The PageRank results are shown in Fig.~\ref{exp:pagerank}. We used the same search engine dataset as before and a new dataset representing movie websites \footnote{The search engine graph was retrieved from \url{http://www.cs.toronto.edu/~tsap/experiments/download/download.html}}.
+For the second plot, we used a random graph with 5000 nodes and 500,000 edges. Although the search engine graph has half the edges (around 250,000), it scales better than the random graph, meaning that the PageRank program depends on the number of nodes to be more scalable.
+
+\begin{figure*}[hp]
    \centering
-   \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{speedup_pagerank-search_engines.pdf}
+   \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{new-benchmarks/speedup_pagerank-search_engines.pdf}
       \caption{Search engine, a graph of web pages collected from a search engine (around 12,000 nodes)}
    \end{subfigure}
-   \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{speedup_pagerank-movies.pdf}
-      \caption{Movie, a graph of web pages collected from movie sites (around 8,000 nodes).\newline}
-   \end{subfigure}
-   \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{speedup_pagerank-500.pdf}
-      \caption{Using a random, dense graph (with 500 nodes).\newline}
+   \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{new-benchmarks/speedup_pagerank-5000.pdf}
+      \caption{Using a random graph with 5,000 nodes.\newline}
    \end{subfigure}
    \caption{Experimental results for the asynchronous PageRank algorithm.}
    \label{exp:pagerank}
 \end{figure*}
 
-The PageRank results are shown in Fig.~\ref{exp:pagerank}. We have used the same search engine dataset as before and a new dataset representing movie websites \footnote{Both the search engine and movie graphs were retrieved from \url{http://www.cs.toronto.edu/~tsap/experiments/download/download.html}}. We notice that the search engine graph dataset is big enough to allow good execution improvements even with 16 threads, while the movie graph, being smaller, shows some scaling problems as the number of threads increases. Even though the search engine follows the power law it does not slowdown execution (as happened in the GGC program).
-For the third plot, we used a random graph with 500 nodes and 75,000 edges. Since the graph is so dense, the runtime is capable of exploiting the
-available parallelism, resulting in linear scalability.
-
 \begin{figure}[h!]
      \centering
-    \includegraphics[width=0.4\textwidth]{speedup_8queens-11.pdf}
-    \caption{Experimental results for the N queens program (11x11~board).}
+    \includegraphics[width=0.4\textwidth]{new-benchmarks/speedup_8queens-13.pdf}
+    \caption{Experimental results for the N queens program (13x13~board).}
     \label{exp:8queens}
 \end{figure}
 
-The results for the N queens program are shown in Fig.~\ref{exp:8queens}. This program is much less regular than the other two, since computation starts at the top of the grid and then rolls down, until only the last row is doing computation. Note that as the computation goes from row to row, the number of states increase, creating even more imbalances. The results show that our system is able to scale well with more traditional algorithms such as N Queens.
+The results for the N queens program are shown in Fig.~\ref{exp:8queens}. The program is not regular since computation starts at the top of the grid and then rolls down, until only the last row is doing computation. Note that as the computation goes from row to row, the number of states increase, creating even more imbalances. The results show that our system is able to scale well with more traditional algorithms such as N Queens.
 
 \section{Coordination Experiments}
 
@@ -88,20 +80,19 @@ To do that, we used the following 3 programs:
 Fig.~\ref{exp:heat-transfer} shows the results for the heat transfer program. \textbf{Threads} represents the speedup of the multicore execution
 without coordination, while \textbf{Coord} represents the speedup when using coordination directives.
 Both execution modes were compared against the sequential execution without coordination.
-When using 1 thread, the coordinated version is almost 2 times
-faster, however this speedup is slightly reduced as more threads are added. This happens because the \textbf{add-priority} action fact is ignored
-when it is sent to a node located in a different thread.
-Also note how the \textbf{Coord} line goes over the \textbf{Ideal} line, to the point where using 2 threads is 4 times faster than the sequential
-version without priorities.
+When using 1 thread, the coordinated version is 1.5 times
+faster, however the advantage completely disappears as more threads are added. This happens because the \textbf{set-priority} action fact is ignored
+when it is sent to a node located in a different thread. Also, the cost of scheduling is too large when compared to the short time spent
+updating the heat value.
 
 \begin{figure}[h!]
      \centering
    \begin{subfigure}[b]{0.4\textwidth}
-      \includegraphics[width=\textwidth]{speedup_heat-transfer-80.pdf}
-      \caption{HT program.\newline}\label{exp:heat-transfer}
+      \includegraphics[width=\textwidth]{new-benchmarks/speedup_new-heat-transfer-80.pdf}
+      \caption{Heat transfer program.}\label{exp:heat-transfer}
    \end{subfigure}
    \begin{subfigure}[b]{0.4\textwidth}
-      \includegraphics[width=\textwidth]{speedup_shortest-uspowergrid.pdf}
+      \includegraphics[width=\textwidth]{new-benchmarks/speedup_shortest-uspowergrid.pdf}
       \caption{SSSP program with the US Power Grid dataset.}\label{exp:sssp-uspowergrid}
    \end{subfigure}
    \caption{Experimental results for the HT and SSSP programs when using coordination.}
@@ -116,10 +107,10 @@ These statistics and the speedup (\textbf{Speedup}) when using the coordinated v
 We have tried to understand if there is a correlation between the graph structure and the coordination speedup. We can see that a higher number
 of nodes and edges tends to improve execution. The US Airports dataset stands out because it is a small sized graph where a subset of airports
 (70) have most connections. The other smaller datasets have a much uniform distribution.
-Still, the coordinated execution for most datasets is 30\% faster than the regular execution. We also included the speedup plot
+Still, the coordinated execution for most datasets is, on average, around 30\% faster than the regular execution. We also included the speedup plot
 for the US Power Grid dataset in Fig.~\ref{exp:sssp-uspowergrid} that compares the regular version against the coordinated version.
-We note that the coordinated version loses its advantages as the number of threads increase. This may happen because we do not
-use action facts that are sent between nodes in different threads.
+We note that the coordinated version loses its advantages as the number of threads increase. This happens because we do not
+currently use action facts that are sent between nodes in different threads.
 
 \begin{table*}[ht]
 
@@ -128,21 +119,18 @@ use action facts that are sent between nodes in different threads.
     \begin{tabular}{| l | c | c | c | c | c | c | c |}
     \hline
     \textbf{Dataset} & \textbf{Speedup} & \textbf{\# Nodes} & \textbf{\# Edges} & \textbf{Edges / Node} & \textbf{25\% Edges} & \textbf{50\% Edges} & \textbf{75\% Edges} \\ \hline \hline
-    500 US Airports & 1.497 & 500 & 5960 & 11.92 & 14 & 37 & 70 \\ \hline
-    US Power Grid & 1.459 & 4941 & 13188 & 2.67 & 485 & 1374 & 2131 \\ \hline
-    Celegans Neural Network & 1.074 & 297 & 2345 & 7.89 & 24 & 65 & 104 \\ \hline
-    Facebook like social network & 1.570 & 1899 & 20296 & 10.68 & 42 & 150 & 273 \\ \hline
-    Intra-organizational network & 1.090 & 77 & 2288 & 28.94 & 9 & 24 & 36 \\ \hline
+    500 US Airports & 1.630 & 500 & 5960 & 11.92 & 14 & 37 & 70 \\ \hline
+    US Power Grid & 1.425 & 4941 & 13188 & 2.67 & 485 & 1374 & 2131 \\ \hline
+    Celegans Neural Network & 1.122 & 297 & 2345 & 7.89 & 24 & 65 & 104 \\ \hline
+    Facebook like social network & 1.532 & 1899 & 20296 & 10.68 & 42 & 150 & 273 \\ \hline
+    Intra-organizational network & 1.120 & 77 & 2288 & 28.94 & 9 & 24 & 36 \\ \hline
     \end{tabular}}
 \end{center}
      \caption{Summarized information about the datasets used in the SSSP program.}
      \label{tbl:shortest_path_speedup}
 \end{table*}
 
-While the previous results were computed using only one thread, we also see good speedups with multiple threads. However, the gains reduce as we add
-more threads because the decision of picking the best path is done at the thread level, thus reducing the opportunities for optimization.
-
-For the BP program, we have a noisy image made of 400x400 pixels that needs to be denoised.
+For the BP program, we have a noisy image made of 400x400 pixels that needs to be de-noised.
 To put our implementation in perspective, we have also run the GraphLab (version 1) implementation of the same problem. The results are shown
 in Fig.~\ref{exp:splashbp}. The first plot presents the scalability results for the simple BP problem. The GraphLab version
 uses the \textbf{fifo} scheduler that works identically to the basic \lang scheduler.
@@ -150,15 +138,15 @@ uses the \textbf{fifo} scheduler that works identically to the basic \lang sched
 \begin{figure*}[ht]
    \centering
    \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{splash-bp-speedup1_csv.pdf}
+      \includegraphics[width=\textwidth]{new-benchmarks/speedup_bp-graphlab-400.pdf}
       \caption{Scalability of basic BP.\newline}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{splash-bp-speedup2_csv.pdf}
-      \caption{Scalability of BP with splashes.}
+      \includegraphics[width=\textwidth]{new-benchmarks/speedup2_bp-graphlab-400.pdf}
+      \caption{Scalability of BP with splashes.\newline}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{splash-bp-improv_csv.pdf}
+      \includegraphics[width=\textwidth]{new-benchmarks/improv_bp-graphlab-400.pdf}
       \caption{Coordination improvements by using splashes.}
    \end{subfigure}
    \caption{Experimental results for BP with coordination using splashes. The dataset is a 400x400 image.}
@@ -167,8 +155,8 @@ uses the \textbf{fifo} scheduler that works identically to the basic \lang sched
 
 The plot in Fig.~\ref{exp:splashbp}~(b) shows the scalability of the coordinated version. For GraphLab we used the \textbf{splash} scheduler, while \lang
 runs with the extra coordination rules. Again, the scalability lines are very similar, but GraphLab appears to be slightly more scalable.
-Finally, the last plot (Fig.~\ref{exp:splashbp}~(c)) presents the improvements of the coordinated version over the basic version when using a different
-number of threads. With only 1 thread, we get almost a 5-fold speedup over the version without coordination. We can also see that adding more threads tends to reduce the effectiveness of splash trees in both systems.
+Finally, the last plot (Fig.~\ref{exp:splashbp}~(c)) presents the improvements of the coordinated version over the basic version.
+With only 1 thread, we get almost a 3-fold speedup over the version without coordination. We can also see that adding more threads tends to reduce the effectiveness of splash trees in both systems.
 
 In summary, using a small set of action facts and derivation rules we were able to implement complex
 scheduling strategies similar to the ones present in GraphLab, a practical and powerful machine learning
@@ -214,17 +202,17 @@ the code is much more concise than the corresponding code of GraphLab.
 We also made some absolute runtime comparisons of \lang programs with the same programs written in
 other languages such as Prolog, Python and C/C++.
 
-In our experiments, the N Queens program runs
-more than 100 times slower when compared to a C implementation and 30 times slower than a Python
-implementation. The PageRank algorithm runs around 20 times slower than the identical GraphLab
-implementation and the SSSP program runs 60 times slower than the C version.
+In our experiments, the N Queens program runs more than 20 times slower when compared to a sequential C implementation and is two times faster than a Python
+implementation. The PageRank algorithm runs around 5 to 6 times slower than the identical GraphLab
+implementation and the SSSP program runs 60 times slower than the sequential C version.
 
 Previously, we have seen that the \lang version of Splash BP program has the same scalability pattern
-as GraphLab (Fig.~\ref{exp:splashbp}), however our experiments show that \lang runs about 3 to 4 times slower in absolute terms. This is better than the other comparisons and can be explained by the fact
+as GraphLab (Fig.~\ref{exp:splashbp}), however our experiments show that \lang runs about 1.7 times slower in absolute terms.
+This is better than the other comparisons and can be explained by the fact
 that most computation is done inside external C functions and not applying rules.
 
 We can see a correlation between the number of rules applied and facts derived and execution time.
-Because our virtual machine is still a work in progress, we can see plenty of optimization opportunities
+Because our virtual machine is still a work in progress, we can see some optimization opportunities
 to improve these results.
 
 \section{Summary}
@@ -232,5 +220,4 @@ to improve these results.
 This section gave some evidence to our thesis that \lang programs are concise and scalable. Moreover, we
 also showed that coordination directives have potential to improve the execution time
 of programs. Our coordination code is also far shorter than competing systems such as GraphLab, which is
-very promising. However, the \lang runtime system is still not competitive in some areas, specially
-when deriving and consuming a huge number of facts.
+very promising.

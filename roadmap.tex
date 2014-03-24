@@ -3,31 +3,60 @@ In this chapter we propose a research roadmap that will allow us to fully establ
 Our experimental results have shown promising results, although this still some work to be done to make
 \lang more usable in real world applications.
 
-\section{Compilation and Runtime Improvements}
+\section{First Major Goal: Improved Coordination Mechanisms}
 
 As we have seen in Chapter~\ref{chapter:exp}, \lang is able to scale programs reasonably well
 in multicore architectures.
-The use of coordination directives also help us improve the execution time of programs. However,
-when we compare the absolute execution time of programs against comparable implementations in
-languages such as C or Prolog, \lang is still not very competitive since it is many times slower.
+The use of coordination directives also help us improve the execution time of programs, although it is not very impressive
+when adding more threads to the system. Therefore, the most important goal for the rest of this thesis is to improve the
+efficiency of coordination directives and associated coordination code. The most critical issue is the fact that no
+coordination information is shared between threads. We need to devise a fast mechanism to share coordination directives
+in order to reduce the costs associated with scheduling node execution.
 
-Although compiled \lang programs are byte-code interpreted, which is a natural
-source of overhead, we think this is still the best architecture for our system and the overhead
-is on the na\"{\i}ve compilation of programs. \lang programs can take advantage of the fact that
+Currently, we use an heap data structure to manage nodes with priorities. This data structure is not the most scalable since it is difficult to parallelize its operations.
+A more scalable approach may be the skip list data structure~\cite{Sundell:2005:FLC:1073765.1073770}.
+
+We want to implement more programs that use coordination. By implementing new programs we can
+extend the set of coordination directives and find out which action or sensing facts may be
+appropriate in our system. We are specially interested in designing more sensing and action
+facts that place nodes in specific threads to improve data locality.
+
+A potential algorithm that we can implement is the Alpha-Beta search algorithm. It is a good program
+because we can reduce the search space by prioritizing certain tree branches. It remains to be
+seen if the program can be easily implemented in \lang.
+We intend to measure the execution speedup of these new coordinated programs.
+
+\section{Second Major Goal: Improved parallelism}
+
+The second goal is to improve the overall scalability of the system. We have tried running our programs with up to 32 threads and I've seen
+some scalability problems. To accomplish this, we first need to understand how
+threads communicate in the system and how that can be improved, specially in terms of node stealing and load balancing.
+
+While the current virtual machine shows good scalability, there is still room for improvement.
+
+Firstly, it should be possible for other threads to immediately update the set of candidate rules when a fact
+is sent to a node in another thread. This will increase data locality and reduce overall execution time.
+
+Secondly, we are currently ignoring coordination information that is sent to nodes in other threads.
+This tends to reduce the effects of coordination since an increasing number of
+coordination facts are being ignored when more threads are added to the system. We need to design an efficient mechanism that allows sharing of coordination
+information between threads. A direct approach is to allow other threads to concurrently manage the priority queue of nodes
+of other threads. This will require efficient synchronization in order to reduce the keep the costs of coordination low.
+
+Finally, there is a plenty of small improvements that can be made in the node stealing algorithm in order to
+get a slightly better scalability.
+
+\section{Third Major Goal: Compilation and Runtime Improvements}
+
+The third goal is to improve the absolute running time of Meld programs. While some programs fair very well against slower languages such as Python,
+there's still some work that can be done to make \lang more competitive. \lang programs can take advantage of the fact that
 \lang is logic-based language and thus it is possible to optimize and simplify the execution of rules
 if we prove that facts follow certain properties and constraints.
 
-We think that a big chunk of execution time is spent doing
-database operations such as matching and fetching sets of candidate facts.
-However, some programs such as N Queens are very computationally expensive since they have
-a lot of list manipulation operations.
-
-Finally, there is still some work to be done in terms of scalability. We need to understand how
-threads communicate in the system and how that can be improved, specially in node stealing and load balancing.
-We also need to improve how coordination information can be better utilized between threads and to reduce the costs
-of scheduling and coordination.
-
-\subsection{Overhead Analysis}
+Although compiled \lang programs are byte-code interpreted, which is a natural
+source of overhead, we think this is still the best architecture for our system and the overhead
+is on the na\"{\i}ve compilation of programs. However, 
+if some rules use a lot of mathematical or list operations it may be worth trying to compile them into machine code instead of using interpreted byte-code.
 
 To better understand the sources of overhead of our virtual machine, we propose doing a series
 of experiments to understand where the most execution time is spent. We will gather the following
@@ -58,40 +87,6 @@ items:
 
    Collect information about the use of coordination directives and their effect on the runtime in terms of number of facts proved and rules derived.
    
-\end{itemize}
-
-\subsection{Preliminary Optimization Ideas}
-
-After doing the previous analysis for each \lang program, we intend to try different VM optimizations, namely.
-
-\begin{itemize}
-   \item \textbf{Improve temporary store}
-   
-   Currently the temporary store is just a simple linked list. Since we also look into the temporary store during rule execution, this data structure may be not be optimal and needs to be revamped.
-   
-   \item \textbf{Improve database indexing}
-   
-   Sometimes we need to search for facts where some argument is equal to a constant value. This is problematic when the number of facts is too large. While tries solve this problem to a certain degree, they are not the most appropriate data structure because facts are stored in a fixed order. Moreover, some facts need to be looked using different arguments which requires a tradeoff between memory usage and search time. A potential solution is to dynamically decide which argument should be indexed in order to provide the most performance gains.
-
-We also intend to employ a smarter compilation strategy, where we re-order the body of a rule to increase the number of useful join constraints.
-
-   \item \textbf{Improve removal of facts from the database}
-
-   This is related to the two previous points. Because are system relies on removal of facts, storage and indexing need to take this into account so that removal remains fast.
-
-   \item \textbf{Reduce communication overhead between nodes}
-   
-   When a thread needs to send a fact to another node that is located on that same thread, there is a certain overhead because we assume that other threads will also perform the same operation. We want to improve this by using specialized operations for nodes in the same thread. However, we need to pay attention to the use of work stealing since nodes sometimes are moved between threads.
-
-   \item \textbf{Reduce coordination costs}
-
-   Currently, we use an heap data structure to manage nodes with priorities. This data structure is not the most scalable since it is difficult to parallelize its operations and
-   the current implementation ignores coordination directives that are requested in different threads.
-   A more scalable approach is the skip list data structure~\cite{Sundell:2005:FLC:1073765.1073770}.
-   
-   \item \textbf{JIT compilation of computation heavy rules}
-   
-   If some rules use a lot of mathematical or list operations it may be worth trying to compile them into machine code instead of using interpreted byte-code.
 \end{itemize}
 
 \subsection{Invariant Optimizations}
@@ -147,53 +142,20 @@ a(A, 3) -o ....
 Note that these are only preliminary invariant optimizations. More optimization ideas will appear
 as we look further into our programs and find general patterns.
 
-\subsection{Improved parallelism}
-
-While the current virtual machine shows good scalability, there is still room for improvement.
-
-Firstly, it should be possible for other threads to immediatelly update the set of candidate rules when a fact
-is sent to a node in another thread. This will increase data locality and reduce overall execution time.
-
-Secondly, we are currently ignoring coordination information that is sent to nodes in other threads.
-This tends to reduce the effects of coordination since an increasing number of
-coordination facts are being ignored when more threads are added to the system. We need to design an efficient mechanism that allows sharing of coordination
-information between threads. A direct approach is to allow other threads to concurrently manage the priority queue of nodes
-of other threads. This will require efficient synchronization in order to reduce the keep the costs of coordination low.
-
-Finally, there is a plenty of small improvements that can be made in the node stealing algorithm in order to
-get a slightly better scalability.
-
-\subsection{Measurements}
+\section{Measurements}
 
 After implementing all the needed optimizations, we want to measure the effect of each optimization
 and relate each program to the optimizations used.
 
 Finally we want to systematically compare \lang execution against execution of the identical programs
 in languages such as C, Python, Haskell and Prolog. While we do not expected to run as fast as C,
-we expect \lang programs to be competitive against Python, Haskell and Prolog. This is very important, since
+\lang programs will be very competitive against Python, Haskell and Prolog. This is very important, since
 if the sequential execution is competitive enough, then running the program in parallel will
-beat such systems.
+easily beat such systems.
 
-\section{Coordination \& Programs}
+\section{Optional Major Goal: Program Correctness}
 
-We want to implement more programs that use coordination. By implementing new programs we can
-extend the set of coordination directives and find out which action or sensing facts may be
-appropriate in our system. We are specially interested in designing more sensing and action
-facts that place nodes in specific threads to improve data locality.
-
-A potential algorithm that we can implement is the Alpha-Beta search algorithm. It is a good program
-because we can reduce the search space by prioritizing certain tree branches. It remains to be
-seen if the program can be easily implemented in \lang.
-We intend to measure the execution speedup of these new coordinated programs.
-
-In terms of implementation, our virtual machine ignores action facts for coordination when a fact
-is exchanged between nodes of different threads. We want to design new mechanisms
-that will efficiently handle such situations so that action facts are taken into account without
-slowing down execution due to thread synchronization.
-
-\section{Program Correctness}
-
-If the time allows, we also want to write correctness and termination proofs of some of the implemented \lang programs.
+If the time allows, we also want to write correctness and termination proofs for some of the implemented \lang programs.
 
 Some work has already been done to prove properties of linear logic programs.
 Robert Simmons employed an approach called generative invariants~\cite{simmons:Thesis} to prove that an operational semantics of a programming
@@ -208,16 +170,16 @@ The proposed work is scheduled on a 18 month timeline ending May 2015.
    \item \textbf{Spring 2014}
       
    Perform the overhead and scalability analysis for the current set of \lang programs.
-   Spend some time improving upon the preliminary optimization ideas and implement them.
+   Spend some time thinking about how threads could efficiently share coordination data.
 
    \textbf{Checkpoint}: new benchmarks for \lang programs taking into account the new optimizations.
 
    \item \textbf{Summer 2014}
+
+   Write a few more programs using coordination.   
+   Meanwhile extend the set of coordination directives that will help implement the new programs.
    
    Design a set of invariant optimizations and implement them in the compiler. Meanwhile, benchmark the runtime of programs to see how they improve the execution.
-
-   Writing a few more programs using coordination.
-   Meanwhile extend the set of coordination directives that will help implement the new programs.
 
    \textbf{Checkpoint}: new benchmarks for \lang programs and their comparison against other implementations.
    

@@ -1,0 +1,10 @@
+greedy-graph-coloring-search_engines th1 7625 6946 7445 -> 7338
+greedy-graph-coloring-search_engines th2 4543 5293 5322 -> 5052
+greedy-graph-coloring-search_engines th4 1760 2308 2183 -> 2083
+greedy-graph-coloring-search_engines th6 1394 1600 1875 -> 1623
+greedy-graph-coloring-search_engines th8 1217 1239 1415 -> 1290
+greedy-graph-coloring-search_engines th10 1129 1349 1126 -> 1201
+greedy-graph-coloring-search_engines th12 1142 1039 1225 -> 1135
+greedy-graph-coloring-search_engines th14 1029 966 1126 -> 1040
+greedy-graph-coloring-search_engines th16 985 1145 983 -> 1037
+greedy-graph-coloring-search_engines sl 7625 6946 7445 -> 7338

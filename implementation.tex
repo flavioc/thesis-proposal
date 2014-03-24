@@ -101,29 +101,39 @@ void work_loop(thread_id tid) {
 
 \section{Database and Core Engine}\label{sec:core_engine}
 
-The database is implemented using several trie data structures. Tries are trees where facts are indexed
-by the common arguments. Because we need to delete facts from the database, we implemented each trie level
-as a double linked list so trie nodes can be easily removed. If a trie level has too many nodes, we
-transform the linked list into a hash table in order to improve lookup.
+The database is implemented using three data structures: trie data structures, list data structures and hash table data structures.
+The database must be implemented efficiently because during matching of rules, we build a
+\emph{match object}, which fixes arguments of the target predicate to instantiated values.
 
-Each node uses a trie per predicate to store facts. During matching of rules, we build a
-\emph{match object}, which matches some arguments of the target predicate to instantiated values, so
-that by searching the predicate trie from top to bottom, we can easily discard invalid trie branches.
+\begin{description}
+   \item[Trie Data Structures]
 
-Each node database is separated into two sets,
-the database itself, and the \emph{temporary store}. The temporary store contains facts that have been
-derived or have been sent to the node but have not been considered in rule derivations.
-The temporary store exists for efficiency reasons because many linear facts are short-lived.
+   Tries are used exclusively to store persistent facts.
+   Tries are trees where facts are indexed by the common arguments. When a trie level has too many nodes, we
+   transform the linked list into a hash table in order to improve lookup.
+      
+   \item[List Data Structures]
+   
+   We use doubly linked lists to store linear facts. Each fact contains the standard \texttt{prev} and \texttt{next} pointers
+   and also the fact arguments. We use a double linked list because it is very efficient to add and remove facts.
+   
+   \item[Hash Table Data Structures]
+   
+   When a double linked list is too long and we need to search for facts by a fixed argument, it becomes very slow to go through the
+   linked list and find the matched facts. To fix this, the virtual machine decides which arguments are best to be indexed and then
+   uses an hash table indexed by the appropriate argument. If we need to look for such argument then we just lookup in the hash table. However,
+   if we need to go through all the facts, we just iterate through all the facts in the table. For collisions, we use the above doubly linked
+   data structure.
+\end{description}
 
-The temporary store is used to build the set of candidate rules that is represented as a priority queue.
-To apply the rules, we take the highest priority rule from the queue and then run it.
+Whenever we add a new fact to a node, we update the set of candidate rules. This set is represented as a bitmap.
+To apply the rules, we take the least significant rule from the bitmap and then run it.
 If the derivation was successful, new facts may have been derived, thus we need to consider new
-rules that are candidates from the newly derived facts and add them to the rule's priority queue.
+rules that are candidates from the newly derived facts and add them to the rule's bitmap.
 On the other hand, when linear facts are consumed, some rules may not be applicable anymore and thus
-we may need to remove them from the priority queue. In our implementation,
-we keep a fact count for each predicate per node and also which predicates are needed for each rule. Whenever we have facts of some
-predicates we can efficiently check if new rules are applicable for a specific node. We keep taking rules from the
-queue until the queue is empty.
+we may need to remove them from the bitmap. In our implementation,
+we keep a fact count for each predicate per node and also bitmap to mark which predicates are needed for each rule. Whenever we have facts of some
+predicates we can efficiently check if new rules are applicable for a specific node.
 
 We do a small optimization to reduce the number of derivations of persistent facts. We
 divide the program rules into two sets: \emph{persistent rules} and \emph{non persistent rules}.
@@ -183,6 +193,5 @@ on the simulator.
 \section{Summary}
 
 This section provided a very brief overview of the current implementation of \lang. Although the parallel and load balancing facilities of the
-runtime system are mostly completed, there is still some implementation work to be done at the core engine level in order to make execution faster.
-As it will be explained in Chapter~\ref{chapter:exp}, \lang is not yet competitive against other systems, therefore we intend to perform more
-implementation work as part of this thesis to make the virtual machine as fast as possible.
+runtime system are mostly completed, there is still some implementation work to be done, specially at the coordination level.
+We also explained how \lang can be implemented in different distributed systems.

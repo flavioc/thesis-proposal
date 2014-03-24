@@ -13,6 +13,7 @@ proposal.pdf: proposal.tex	\
 		appendix.tex \
 		statement.tex \
 		related_work.tex \
+		abstract.tex \
 		execution_trace1.pdf execution_trace2.pdf execution_trace3.pdf execution_trace4.pdf
 	pdflatex proposal.tex
 	pdflatex proposal.tex

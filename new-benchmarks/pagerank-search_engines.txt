@@ -1,0 +1,10 @@
+pagerank-search_engines th1 6376 7235 6289 -> 6633
+pagerank-search_engines th2 3458  3420 -> 2292
+pagerank-search_engines th4 1689 1759 1751 -> 1733
+pagerank-search_engines th6 1335 1308 1303 -> 1315
+pagerank-search_engines th8 1113 1104 1137 -> 1118
+pagerank-search_engines th10 985 997 1019 -> 1000
+pagerank-search_engines th12 896 922 882 -> 900
+pagerank-search_engines th14 854 861 860 -> 858
+pagerank-search_engines th16 841 897 861 -> 841
+pagerank-search_engines sl 6376 7235 6289 -> 6633

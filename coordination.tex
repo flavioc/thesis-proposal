@@ -23,23 +23,25 @@ program results will not be exact, they follow important statistical properties 
 Examples of such programs are PageRank~\cite{Lubachevsky:1986:CAA:4904.4801} and
 Loopy Belief Propagation~\cite{Gonzalez+al:aistats09paraml}.
 
-\section{Node Priority}
+\section{Scheduling Facts}
 
 We can use action facts to change the order in which nodes are evaluated by adding
 \emph{priorities}. Node priority works at the worker level
 so that each worker can make a local decision about which node of the graph to run next.
 Note that, by default, nodes are picked arbitrarily (a FIFO approach is used).
 
-The following list presents the action facts available to manipulate priorities.
+The following list presents the action facts available to manipulate the scheduling decisions of the system:
 
 \begin{description}
    \item[\texttt{type linear action set-priority(node, float)}]: This sets the priority of a node. If the node already has some priority, we only change the priority if the new one is higher priority. The programmer can decide if priorities are to be ordered in ascending or descending order.
    \item[\texttt{type linear action add-priority(node, float)}]: This gets the current node's priority and increases or decreases it.
    \item[\texttt{type linear action schedule-next(node)}]: The work will fetch the highest priority node's priority $P$ from its set of nodes and set the action's argument node's priority as $P + 1.0$. If using the priorities
    in ascending order, we pick the lowest priority and subtract $1.0$.
+   \item[\texttt{type linear action unset-priority(node)}]: Removes the priority, if any, of a given node.
+   \item[\texttt{type linear action stop-program(node)}]: Immediately stops the execution of the whole program.
 \end{description}
 
-When the highest priority node is picked up for execution, its priority is reset to 0. This means that
+When the highest priority node is picked up for execution, its priority is reset to 0 (the default priority value). This means that
 the programmer must set the node's priority again if he wants to prioritize that node.
 
 We intend to add more action facts in the near future. For example, we want the programmer to be able to place specific nodes in workers. This will permit good use of
