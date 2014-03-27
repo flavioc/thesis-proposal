@@ -3,10 +3,11 @@ Firstly, we want to show that our virtual machine performs well when running mul
 i.e., it can reasonably schedule the execution of programs to reduce execution time and increase parallel speedup. Secondly, we want to show that by using coordination directives, programs can perform faster.
 Finally, we want to show that our programs are usually shorter than programs written in other languages.  
 
-In our experimental setup, we used a machine with
-four AMD Six-Core Opteron TM 8425 HE (2100 MHz) chips (24 cores) and 64 GB of DDR-2 667MHz (16x4GB) RAM,
-     running GNU/Linux (kernel 2.6.31.5-127 64 bits).
-     We compiled our virtual machine using GCC 4.4.5 (g++) with the flags \texttt{-O3 -std=c+0x -march=x86-64}.
+In our experimental setup, we used a machine 
+with two 16 (32) Core AMD Opteron
+(tm) Processor 6274 $@$ 2.2 GHz with 32 GBytes of RAM memory and running the Linux
+kernel 3.8.3-1.fc17.x86\_64.
+     We compiled our virtual machine using GCC 4.7.2 (g++) with the flags \texttt{-O3 -std=c+0x -march=x86-64}.
      We run all experiments 3 times with the same configuration and then we averaged the run time.
 
 \section{Parallel Experiments}

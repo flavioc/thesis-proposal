@@ -3,7 +3,7 @@ based on graphs, linear logic, coordination and provability.
 
 \subsection{Declarative Programming}
 
-Many programming models have been developed in order to make parallel programs both easier to write and reason about. The most famous examples of such paradigms are \emph{logic programming} and \emph{functional programming}.
+Many programming models have been developed in order to make parallel programs both easier to write and reason about. The most popular examples of such paradigms are \emph{logic programming} and \emph{functional programming}.
 In logic languages such as Prolog, researchers took advantage of the non-determinism of proof-search to evaluate subgoals
 in parallel with models such as \emph{or-parallelism} and \emph{and-parallelism}~\cite{Gupta:2001:PEP:504083.504085}.
 In functional languages, the stateless nature of computation allows multiple expressions to evaluate safely in parallel.
@@ -23,7 +23,7 @@ nets~\cite{Chu:2007:DID:1322263.1322281} and cloud computing~\cite{alvaro:boom}.
 
 \subsection{Graph-Based Programming Models}
 
-Like Meld, many programming systems also model the program as a graph where computation will be performed.
+Like Meld, many programming systems also model the application as a graph where computation will be performed.
 The Dryad system~\cite{Isard:2007:DDD:1272996.1273005} combines computational vertices
 with communication channels (edges) to form a data-flow graph. The program is scheduled to
 run on multiple computers or cores and data is partitioned during runtime. Routines that run on computational vertices
@@ -31,8 +31,7 @@ are sequential, with no synchronization.
 
 The Pregel system~\cite{Malewicz:2010:PSL:1807167.1807184} is also graph based, although programs have a more strict
 structure. They must be represented as a sequence of iterations where each iteration is composed of computation and message passing.
-Pregel is specially suited to solve very big graphs
-and to scale to large architectures.
+Pregel is specially suited to work on big graphs and to scale to large architectures.
 
 GraphLab~\cite{GraphLab2010} is a C++ framework for developing parallel machine learning
 algorithms. While Pregel uses message passing, GraphLab allows nodes to have read/write
@@ -49,7 +48,7 @@ Linear logic is a substructural logic proposed by Jean-Yves Girard~\cite{Girard9
 Since computer science is focused on processes and algorithms, linear logic has been used
 in many areas of computing such as programming languages, game semantics, concurrent programming, knowledge representation, etc.
 Due to the resource interpretation of the logic, linear logic presents a good basis for programming
-languages that allow state manipulation.
+languages with a structured way to manage state.
 
 In the context of the Curry-Howard correspondence~\cite{howard:tfatnoc}, linear logic has been applied in programming languages
 as a mechanism to implement \emph{linear types}. Linear types or also sometimes known as \emph{uniqueness types} are types

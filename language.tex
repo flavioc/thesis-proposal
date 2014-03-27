@@ -60,7 +60,7 @@ replace(@3, 6, 7).
 Our first example shown in Fig.~\ref{code:btree_replace} implements the key update operation for a binary tree
 represented as a key/value dictionary. Each LM node represents a binary tree node.
 We first declare all the predicates (lines 1-4), which represent the kinds of facts we are going to use.
-Predicate \texttt{left/2} and \texttt{right/2} is persistent while \texttt{value/3} and \texttt{replace/3} are linear.
+Predicate \texttt{left/2} and \texttt{right/2} are persistent while \texttt{value/3} and \texttt{replace/3} are linear.
 Note that \texttt{left/2} and \texttt{right/2} are \texttt{route} predicates, since they are used for communication
 between nodes (left and right branches, respectively). \texttt{value/3} assigns a key/value pair to a node and can
 be updated since it is linear. The \texttt{replace/3} linear predicate represents an update operation where the key in
@@ -301,7 +301,7 @@ such as \texttt{visit(A)} in line 10 in Fig.~\ref{code:visit}. Variables can be 
 also in the head when instantiating facts. Constraints are boolean expressions that must
 be true in order for the rule to be fired. Constraints use variables from fact expressions and are built using a small functional language that includes mathematical operations, boolean operations, external functions and literal values.
 
-The head of a rule, $HE$, contains linear ($L$) and persistent ($P$) \emph{fact templates} which are uninstantiated facts and will derive new facts. The head can also have \emph{exists expressions} ($EE$), \emph{comprehensions} ($CE$) and \emph{aggregates} ($AE$). All those constructs
+The head of a rule, $HE$, contains linear ($L$) and persistent ($P$) \emph{fact templates} which are uninstantiated facts and will derive new facts. The head can also have \emph{exists expressions} ($EE$), \emph{comprehensions} ($CE$) and \emph{aggregates} ($AE$). All those expressions
 may use all the variables instantiated in the body.
 
 \subsection{Predicates and Facts}

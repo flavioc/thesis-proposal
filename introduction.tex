@@ -1,5 +1,5 @@
 
-The last decade has seen a priority shift for processor manifactures. If clock frequency
+The last decade has seen a priority shift for processor manufactures. If clock frequency
 was once the main metric for performance, today computing power is measured in number of
 cores in a single chip.
 For software developers and computer scientists, once focused in developing sequential programs,
@@ -14,31 +14,31 @@ In the future, \emph{many-core} processors will make this task look even more da
 
 Advances in network speed and bandwidth are making distributed computing
 more appealing. For instance, \emph{cloud computing} is a new emerging paradigm that wants
-to make every computer connected to the Internet as a client of a pool of computing power,
+to make every computer connected to the Internet as a part of a pool of computing power,
 where data can be retrieved and computation performed. From the perspective of high performance
 computing, the \emph{computer cluster} is a well established paradigm that uses fast local area
 networks to improve performance and solve problems that would take a long time with a single computer.
 
 Developments in parallel and distributed programming have given birth to several programming models.
-At the end of the spectrum are lower-level programming abstractions such as
+At one end of the spectrum are lower-level programming abstractions such as
 \emph{message passing} (e.g., MPI~\cite{gabriel04-open-mpi}) and \emph{shared memory}
 (e.g., Pthreads~\cite{Butenhof:1997:PPT:263953} or OpenMP~\cite{Chapman-2007-UOP-1370966}).
-While such abstractions are very expressive and enable the programmer to write very performant code,
-they tend to be very hard to use, debug or prove correctness.
-On the opposite side, we have many declarative programming models
+While such abstractions are very expressive and enable the programmer to write high performant code,
+program APIs are very hard to use and debug, which makes it difficult to prove that a program is correct.
+On the opposite end, we have many declarative programming models
 that can be run in parallel~\cite{Blelloch:1996:PPA:227234.227246}.
 While those declarative paradigms tend to make programs easier to reason about, they tend to offer
 little or no control to the programmer for managing parallel execution
 which may result in suboptimal performance.
 
-In the context of the Claytronics project~\cite{goldstein-computer05}, Ashley-Rollman et
-al~\cite{ashley-rollman-iclp09, ashley-rollman-derosa-iros07wksp} have created Meld, a logic programming language suited to
-program massively distributed systems made of modular robots with a dynamic topology. Meld programs can derive actions that are used
+In the context of the Claytronics project~\cite{goldstein-computer05}, Ashley-Rollman~\cite{ashley-rollman-iclp09, ashley-rollman-derosa-iros07wksp}
+has created Meld, a logic programming language suited to program massively distributed systems made of modular robots with a dynamic topology.
+Meld programs can derive actions that are used
 to make the robots act on the outside world. The distribution of computation is done
 by first partitioning the program state across the robots and then making the computation local to the node. Because Meld programs
 are sets of logical clauses, they are more amenable to proof.
 
-However, Meld and other declarative programming models give very little control to the programmer since they are heavily declarative.
+However, Meld and other declarative programming models give very little control to the programmer since they are stateless languages.
 This is a clear disadvantage against lower-level abstractions, since its difficult to change how programs are scheduled by
 the runtime system and how the system manages parallelism.
 

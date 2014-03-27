@@ -6,7 +6,7 @@ control to the programmer through the use of coordination directives to make the
 faster and more scalable. These coordination
 directives change how the runtime system schedules computation and can be written with the same
 facilities used to write standard program code. Finally, we want to show that the logical foundations
-of \lang can be leveraged to make program execution competitive when compared to implementations
+of \lang can be leveraged to make programs more expressive and faster to execute when compared to implementations
 in other declarative languages.
 
 \lang will accomplish these goals using four main ideas:
@@ -17,7 +17,7 @@ in other declarative languages.
    
    We divide the logical facts across all the nodes of the graph. Since the
    logical rules only make use of data local to a node, computation can be performed at the
-   node level, disregarding the other nodes of the graph. We envision the program as
+   node level, without reference from other nodes of the graph. We envision the application as
    a communicating graph data structure where each processing unit performs work on a different subset of the graph,
    thus creating parallelism. This is an advantage of LM since we can run programs on many different types
    of distributed systems as long as the underlying runtime system uses the appropriate communication facilities.
