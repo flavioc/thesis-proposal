@@ -41,6 +41,20 @@ data, others may need to update edge information. Each consistency model will pr
 guarantees that are better adapted to some algorithms. GraphLab also provides different
 schedulers that dictate the order in which node's are computed.
 
+\subsubsection{Languages for Sensor Networks}
+
+Sensor nets are another interesting domain for programming languages that deal with graph-like networks.
+Programming languages such as Hood~\cite{Whitehouse:2004:HNA:990064.990079}, Tinydb~\cite{Madden:2005:TAQ:1061318.1061322}
+or Regiment~\cite{Newton:2007:RMS:1236360.1236422} have been proposed for this particular domain, providing support for data collection and aggregation over the network.
+These systems assume that the network remains static and nodes stay in place.
+
+Other languages such as Pleiades~\cite{Kothari:2007:REP:1250734.1250757},
+LDP~\cite{4543691} or Proto~\cite{Beal:2006:IEE:1137236.1137354} go beyond static networks and support dynamic reconfiguration. In Pleiades, the programmer writes
+an application from the point of view of the whole sensor network and the compiler transforms it into code that can be run on each individual node.
+LDP is a language derived from a method for distributed debugging, that allows it to efficiently detect conditions
+on variably-sized groups of nodes. It is based on the tick model, generating a new set of condition matchers throughout the ensemble on each tick.
+Like Pleiades and LDP, Proto also compiles global programs into locally executed code.
+
 \subsection{Linear Logic}
 
 Linear logic is a substructural logic proposed by Jean-Yves Girard~\cite{Girard95logic:its} that extends intuitionistic logic with the concept of \emph{truth as resources}. Instead of seeing the truth as immutable, truth is now something that can be consumed during the proof process.
