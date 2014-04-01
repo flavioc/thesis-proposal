@@ -466,7 +466,7 @@ body of a rule, we need to prove that the derivation process (through judgments 
 sound. This lemma is as follows:
 
 \begin{lemma}[Derivation]
-   If the low level derivation $\do \Gamma; \Delta; \Xi; \Gamma_1; \Delta_1; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$ is true then the high level derivation $\dz \Gamma; \Delta; \Gamma_1; \Delta_1; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$ is also true.
+   If the low level derivation $\done \Gamma; \Delta; \Xi; \Gamma_1; \Delta_1; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$ is true then the high level derivation $\dz \Gamma; \Delta; \Gamma_1; \Delta_1; \Omega \rightarrow \Xi'; \Delta'; \Gamma'$ is also true.
 \end{lemma}
 \begin{proof}
    Straightforward use of induction on $\Omega$ except for the sub-case of comprehensions and aggregates, where we need to use the comprehension and aggregate theorems to construct the derivation tree using $n$ applications of the corresponding construct.
