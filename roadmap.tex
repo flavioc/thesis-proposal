@@ -1,18 +1,18 @@
 
 In this chapter we propose a research roadmap that will allow us to fully establish the validity of our thesis.
-Our experimental results have shown promising results, although this still some work to be done to make
+Our experimental results have shown promising results, although there is still some work to be done to make
 \lang more usable in real world applications.
 
 \section{First Major Goal: Improved Coordination Mechanisms}
 
 As we have seen in Chapter~\ref{chapter:exp}, \lang is able to scale programs reasonably well
 in multicore architectures.
-The use of coordination directives also help us improve the execution time of programs, although it is not very impressive
-when adding more threads to the system. Therefore, the most important goal for the rest of this thesis is to improve the
-efficiency of coordination directives and associated coordination code. The most critical issue is the fact that no
-coordination information is shared between threads. We need to devise a fast mechanism to share coordination directives
-in order to reduce the costs associated with scheduling node execution.
+The use of coordination directives also showed potential to improve the execution time of programs, although it was less impressive
+when adding more threads to the system. Therefore, our first major goal for the rest of this thesis is to improve the
+efficiency of coordination directives and associated coordination code.
 
+A critical issue in our implementation is the fact that no coordination information is shared between threads. We need to devise a fast mechanism to share coordination directives
+in order to reduce the costs associated with scheduling node execution.
 Currently, we use an heap data structure to manage nodes with priorities. This data structure is not the most scalable since it is difficult to parallelize its operations.
 A more scalable approach may be the skip list data structure~\cite{Sundell:2005:FLC:1073765.1073770}.
 
@@ -21,30 +21,22 @@ extend the set of coordination directives and find out which action or sensing f
 appropriate in our system. We are specially interested in designing more sensing and action
 facts that place nodes in specific threads to improve data locality.
 
-A potential algorithm that we can implement is the Alpha-Beta search algorithm. It is a good program
-because we can reduce the search space by prioritizing certain tree branches. It remains to be
+A potential algorithm that we can implement is the Alpha-Beta search algorithm
+that allows us to reduce the search space by prioritizing certain tree branches. However, it remains to be
 seen if the program can be easily implemented in \lang.
 We intend to measure the execution speedup of these new coordinated programs.
 
 \section{Second Major Goal: Improved parallelism}
 
-The second goal is to improve the overall scalability of the system. We have tried running our programs with up to 32 threads and I've seen
+Our second goal is to improve the overall scalability of the system. We have tried running our programs with up to 32 threads and we've seen
 some scalability problems. To accomplish this, we first need to understand how
-threads communicate in the system and how that can be improved, specially in terms of node stealing and load balancing.
+threads communicate, specially in terms of node stealing and load balancing.
 
-While the current virtual machine shows good scalability, there is still room for improvement.
-
-Firstly, it should be possible for other threads to immediately update the set of candidate rules when a fact
+While the current virtual machine shows good scalability, there is still room for improvement. First,
+it should be possible for other threads to immediately update the set of candidate rules when a fact
 is sent to a node in another thread. This will increase data locality and reduce overall execution time.
-
-Secondly, we are currently ignoring coordination information that is sent to nodes in other threads.
-This tends to reduce the effects of coordination since an increasing number of
-coordination facts are being ignored when more threads are added to the system. We need to design an efficient mechanism that allows sharing of coordination
-information between threads. A direct approach is to allow other threads to concurrently manage the priority queue of nodes
-of other threads. This will require efficient synchronization in order to reduce the keep the costs of coordination low.
-
 Finally, there is a plenty of small improvements that can be made in the node stealing algorithm in order to
-get a slightly better scalability.
+get better scalability.
 
 \section{Third Major Goal: Compilation and Runtime Improvements}
 
@@ -86,10 +78,7 @@ items:
    \item \textbf{Priority information}
 
    Collect information about the use of coordination directives and their effect on the runtime in terms of number of facts proved and rules derived.
-   
 \end{itemize}
-
-\subsection{Invariant Optimizations}
 
 The sequential execution of LM programs can be further improved by using invariant optimizations.
 By this, we mean proving certain properties about the program and its facts and then compiling the program accordingly.
@@ -123,8 +112,8 @@ a(A, X), b(A, X) -o a(A, Y).
    
    Single use facts are a special case of triggering linear facts because once they are derived they are
    proven to be immediately consumed. The following example shows the only place in the program where
-   the \texttt{a} predicate is used in the body of the rule. Note that no matter what the state of
-   the database is, we can prove that \texttt{a} facts can be used immediately and will work as a function
+   the \texttt{a/2} predicate is used in the body of the rule. Note that no matter what the state of
+   the database is, we can prove that \texttt{a/2} facts can be used immediately and work as a function
    call in imperative languages.
    
    \begin{Verbatim}
@@ -142,29 +131,29 @@ a(A, 3) -o ....
 Note that these are only preliminary invariant optimizations. More optimization ideas will appear
 as we look further into our programs and find general patterns.
 
-\section{Measurements}
+\section{Fourth Major Goal: Measurements}
 
 After implementing all the needed optimizations, we want to measure the effect of each optimization
 and relate each program to the optimizations used.
 
 Finally we want to systematically compare \lang execution against execution of the identical programs
 in languages such as C, Python, Haskell and Prolog. While we do not expected to run as fast as C,
-\lang programs will be very competitive against Python, Haskell and Prolog. This is very important, since
+\lang programs should be very competitive against Python, Haskell and Prolog. This is very important, since
 if the sequential execution is competitive enough, then running the program in parallel will
-easily beat such systems.
+easily beat such languages.
 
-\section{Optional Major Goal: Program Correctness}
-
-If the time allows, we also want to write correctness and termination proofs for some of the implemented \lang programs.
+\section{Optional Goal: Program Correctness}
 
 Some work has already been done to prove properties of linear logic programs.
 Robert Simmons employed an approach called generative invariants~\cite{simmons:Thesis} to prove that an operational semantics of a programming
 language follows some invariants, namely type preservation. It may be possible to extend such approach to
 prove several invariants about our programs, including correctness invariants.
 
+If the time allows, we also want to write correctness and termination proofs for some of the implemented \lang programs.
+
 \section{Planned Schedule}
 
-The proposed work is scheduled on a 18 month timeline ending May 2015.
+The proposed work is scheduled on a 12 month timeline ending May 2015.
 
 \begin{itemize}
    \item \textbf{Spring 2014}

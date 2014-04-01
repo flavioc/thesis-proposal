@@ -163,26 +163,26 @@ when it comes to data partitioning, communication and parallelism.
 
 \subsection{MPI Implementation}
 
-The current MPI implementation is similar to the multicore implementation with a few important distinctions. First, since there is no shared
+The current MPI implementation is based on the multicore implementation with a few important distinctions. First, since there is no shared
 memory between MPI processes residing at different machines, the global database is stored separately such that each process contains a subset
 of the underlying graph model.
 
 Communication is more costly since facts must be serialized at the source machine and then deserialized
-at the target machine in order to be processed. To increase throughput, facts are buffered and sent only when there is enough of them.
+at the target machine in order to be processed. To increase throughput, facts are buffered and sent only when their size is close to the size of the MPI buffer.
 The send operation is done asynchronously to allow the source process to continue its computation while communication happens in the background.
 After a while, once we confirm that the facts have been received and the processes become idle, the Dijkstra-Safra's~\cite{safras87} algorithm
 is used in order to detect program termination.
 
-In our preliminary version, the node partitioning is static since there is no work stealing once the initial nodes are assigned to processes.
-Moving a node to another machine may be too prohibitive if the node database is too big.
+In our preliminary version, the node partitioning is static and there is no work stealing once the initial nodes are assigned to processes since
+moving a node to another machine may be too prohibitive if the node database is too big.
  
 \subsection{Blinky Blocks Implementation}
 
-Since the Blinky Blocks~\cite{Kirby-chi11} is a physical distributed system, it has very different requirements when compared to the multicore
-or the MPI version. First, each blinky block is a processing unit and naturally will be mapped to a single node. Communication is also restricted
+The Blinky Blocks~\cite{Kirby-chi11} is a physical distributed system. It has thus very different requirements and restrictions when compared to the multicore
+or the MPI versions. As each blinky block is an independent processing unit, it is naturally mapped to a single node and communication is restricted
 to the immediate neighbors that can be attached to the six faces of the cube.
 
-Each blinky block can also sense and actuate on the outside world. For instance, the blinky block can sense a tap and then immediately instantiate
+Each blinky block can sense and actuate on the outside world. For instance, the blinky block can sense a tap and then immediately instantiate
 a new sensing fact that will be used in the program's rules. In terms of actuators, the blocks can emit light using the builtin LED's.
 This allows the running program to interactively present its results in real-time.
 

@@ -1,14 +1,14 @@
-In this chapter we want to present some preliminary results of the \lang runtime system.
-Firstly, we want to show that our virtual machine performs well when running multiple threads,
-i.e., it can reasonably schedule the execution of programs to reduce execution time and increase parallel speedup. Secondly, we want to show that by using coordination directives, programs can perform faster.
-Finally, we want to show that our programs are usually shorter than programs written in other languages.  
+In this chapter we present some preliminary results of the \lang runtime system.
+Firstly, we show that our virtual machine performs well when running multiple threads,
+i.e., it can reasonably schedule the execution of programs to reduce execution time and increase parallel speedup. Secondly, we show that by using coordination directives, programs can perform faster.
+Finally, we show that our programs are usually shorter than programs written in other languages.  
 
 In our experimental setup, we used a machine 
 with two 16 (32) Core AMD Opteron
 (tm) Processor 6274 $@$ 2.2 GHz with 32 GBytes of RAM memory and running the Linux
 kernel 3.8.3-1.fc17.x86\_64.
      We compiled our virtual machine using GCC 4.7.2 (g++) with the flags \texttt{-O3 -std=c+0x -march=x86-64}.
-     We run all experiments 3 times with the same configuration and then we averaged the run time.
+     We run all experiments 3 times with the same configuration and then we averaged the execution time.
 
 \section{Parallel Experiments}
 
@@ -19,40 +19,38 @@ For the parallel results, we run each program using 1, 2, 4, 6, 8, 10, 12, 14 an
        font=scriptsize}
 
 \begin{description}
-   \item[Greedy Graph Coloring (GGC)] in this program, we attempt to color each node of a graph so that no two adjacent nodes have the same color. We start with a small number of colors and then we expand the number of colors when we cannot color the graph.
+   \item[Greedy Graph Coloring (GGC)] this program colors nodes in a graph so that no two adjacent nodes have the same color. We start with a small number of colors and then we expand the number of colors when we cannot color the graph.
    \item[PageRank] implements an asynchronous PageRank algorithm without synchronization between iterations. Every time a node sends a new rank to its neighbors and the change was significant, the neighbors are scheduled to recompute their ranks.
-   \item[N queens] already explained before. We use an 13x13 board.
+   \item[N queens] implements the N Queens problem, as explained before, for a 13x13 board.
 \end{description}
 
-Figure~\ref{exp:graph_coloring} presents the speedup results for the GGC program using 2 different datasets. In the first plot, we show the speedup for a graph of 12,000 webpages. Since this dataset follows the power law, that is, there is a small number of pages with a lots of links (1\% of the nodes have 75\% of the edges), the speedup is slightly worse than the one shown when using a random dataset of 2,000 nodes, where each node has more or less the same number of links.
-
+Figure~\ref{exp:graph_coloring} presents the speedup results for the GGC program using 2 different datasets. In Fig.~\ref{exp:graph_coloring}~(a) we show the speedup for a graph of 12,000 webpages\footnote{The search engine graph was retrieved from \url{http://www.cs.toronto.edu/~tsap/experiments/download/download.html}}. Since this dataset follows the power law, that is, there is a small number of pages with a lots of links (1\% of the nodes have 75\% of the edges), the speedup is slightly worse than the benchmark shown in Fig.~\ref{exp:graph_coloring}~(b), where we use a random dataset of 2,000 nodes and an uniform distribution of edges.
 
 \begin{figure*}[hp]
    \centering
    \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{new-benchmarks/speedup_greedy-graph-coloring-search_engines.pdf}
-      \caption{Search engine, a graph of web pages collected from a search engine (around 12,000 nodes).}
+      \caption{Using a graph of web pages collected from a search engine (around 12,000 nodes and 292,000 edges).}
    \end{subfigure}
    \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{new-benchmarks/speedup_greedy-graph-coloring-2000.pdf}
-      \caption{Using a random graph with 2,000 nodes.\newline}
+      \caption{Using a random graph with 2,000 nodes and 600,000 edges.\newline}
    \end{subfigure}
    \caption{Experimental results for the greedy GGC algorithm.}
    \label{exp:graph_coloring}
 \end{figure*}
 
-The PageRank results are shown in Fig.~\ref{exp:pagerank}. We used the same search engine dataset as before and a new dataset representing movie websites \footnote{The search engine graph was retrieved from \url{http://www.cs.toronto.edu/~tsap/experiments/download/download.html}}.
-For the second plot, we used a random graph with 5000 nodes and 500,000 edges. Although the search engine graph has half the edges (around 250,000), it scales better than the random graph, meaning that the PageRank program depends on the number of nodes to be more scalable.
+The PageRank results are shown in Fig.~\ref{exp:pagerank}. We used the same search engine dataset as before and a new random dataset with 5000 nodes and 500,000 edges. Although the search engine graph (Fig.~\ref{exp:pagerank}~(a)) has half the edges (around 250,000), it scales better than the random graph (Fig.~\ref{exp:pagerank}~(b)), meaning that the PageRank program depends on the number of nodes to be more scalable.
 
 \begin{figure*}[hp]
    \centering
    \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{new-benchmarks/speedup_pagerank-search_engines.pdf}
-      \caption{Search engine, a graph of web pages collected from a search engine (around 12,000 nodes)}
+      \caption{Using a graph of web pages collected from a search engine (around 12,000 nodes and 292,000 edges)}
    \end{subfigure}
    \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{new-benchmarks/speedup_pagerank-5000.pdf}
-      \caption{Using a random graph with 5,000 nodes.\newline}
+      \caption{Using a random graph with 5,000 nodes and 500,000 edges.\newline}
    \end{subfigure}
    \caption{Experimental results for the asynchronous PageRank algorithm.}
    \label{exp:pagerank}
@@ -65,17 +63,17 @@ For the second plot, we used a random graph with 5000 nodes and 500,000 edges. A
     \label{exp:8queens}
 \end{figure}
 
-The results for the N queens program are shown in Fig.~\ref{exp:8queens}. The program is not regular since computation starts at the top of the grid and then rolls down, until only the last row is doing computation. Note that as the computation goes from row to row, the number of states increase, creating even more imbalances. The results show that our system is able to scale well with more traditional algorithms such as N Queens.
+The results for the N queens program are shown in Fig.~\ref{exp:8queens}. The program is not regular since computation starts at the top of the grid and then rolls down, until only the last row is doing computation. Because the number of valid states for the nodes in the upper rows is much less than the nodes in the lower rows, this may create potential load balancing problems. The results show that our system is able to scale well due to work stealing.
 
 \section{Coordination Experiments}
 
 In our coordination experiments, we are interested in showing that coordination improves the execution time of programs.
-To do that, we used the following 3 programs:
+To illustrate that, we used the following 3 programs:
 
 \begin{description}
-   \item[Heat Transfer] in the heat transfer program, we have a grid of cells that transfer heat with the neighbor cells by taking into account the edge weights. We use a dataset with a square of cells in the center of the grid with very high heat, while the outer cells have low heat. We use coordination to prioritize the neighbors of cells where rapid heat changes happen.
+   \item[Heat Transfer] in this program, we have a grid of cells that transfer heat with the neighbor cells by taking into account the edge weights. We use a dataset with a square of cells in the center of the grid with very high heat, while the outer cells have low heat. We use coordination to prioritize the neighbors of cells where rapid heat changes happen.
    \item[Single Source Shortest Path (SSSP)] we use the SSSP program shown earlier but we extended it to compute the distance to several nodes in order to increase the amount of computation.
-   \item[Belief Propagation (BP)] this is the belief propagation program explained before. We build splash trees to improve performance.
+   \item[Belief Propagation (BP)] this is the belief propagation program explained before extended with the use of splash trees to improve performance.
 \end{description}
 
 Fig.~\ref{exp:heat-transfer} shows the results for the heat transfer program. \textbf{Threads} represents the speedup of the multicore execution
@@ -89,7 +87,7 @@ updating the heat value.
 \begin{figure}[h!]
      \centering
    \begin{subfigure}[b]{0.4\textwidth}
-      \includegraphics[width=\textwidth]{new-benchmarks/speedup_new-heat-transfer-80.pdf}
+      \includegraphics[width=\textwidth]{benchmarks/speedup_heat-transfer-80.pdf}
       \caption{Heat transfer program.}\label{exp:heat-transfer}
    \end{subfigure}
    \begin{subfigure}[b]{0.4\textwidth}
@@ -109,8 +107,8 @@ We have tried to understand if there is a correlation between the graph structur
 of nodes and edges tends to improve execution. The US Airports dataset stands out because it is a small sized graph where a subset of airports
 (70) have most connections. The other smaller datasets have a much uniform distribution.
 Still, the coordinated execution for most datasets is, on average, around 30\% faster than the regular execution. We also included the speedup plot
-for the US Power Grid dataset in Fig.~\ref{exp:sssp-uspowergrid} that compares the regular version against the coordinated version.
-We note that the coordinated version loses its advantages as the number of threads increase. This happens because we do not
+for the US Power Grid dataset in Fig.~\ref{exp:sssp-uspowergrid}~(b) that compares the regular version against the coordinated version.
+We note that the coordinated version loses its advantages as the number of threads increase. Again, this happens because we do not
 currently use action facts that are sent between nodes in different threads.
 
 \begin{table*}[ht]
@@ -119,7 +117,7 @@ currently use action facts that are sent between nodes in different threads.
    \resizebox{16.5cm}{!}{
     \begin{tabular}{| l | c | c | c | c | c | c | c |}
     \hline
-    \textbf{Dataset} & \textbf{Speedup} & \textbf{\# Nodes} & \textbf{\# Edges} & \textbf{Edges / Node} & \textbf{25\% Edges} & \textbf{50\% Edges} & \textbf{75\% Edges} \\ \hline \hline
+    \textbf{Dataset} & \textbf{Speedup (1 thread)} & \textbf{\# Nodes} & \textbf{\# Edges} & \textbf{Edges / Node} & \textbf{25\% Edges} & \textbf{50\% Edges} & \textbf{75\% Edges} \\ \hline \hline
     500 US Airports & 1.630 & 500 & 5960 & 11.92 & 14 & 37 & 70 \\ \hline
     US Power Grid & 1.425 & 4941 & 13188 & 2.67 & 485 & 1374 & 2131 \\ \hline
     Celegans Neural Network & 1.122 & 297 & 2345 & 7.89 & 24 & 65 & 104 \\ \hline
@@ -140,15 +138,15 @@ uses the \textbf{fifo} scheduler that works identically to the basic \lang sched
    \centering
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{new-benchmarks/speedup_bp-graphlab-400.pdf}
-      \caption{Scalability of basic BP.\newline}
+      \caption{Basic BP without splashes.\newline}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{new-benchmarks/speedup2_bp-graphlab-400.pdf}
-      \caption{Scalability of BP with splashes.\newline}
+      \caption{BP with splashes.\newline}
    \end{subfigure}
    \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{new-benchmarks/improv_bp-graphlab-400.pdf}
-      \caption{Coordination improvements by using splashes.}
+      \caption{Coordination improvements of BP with splashes over basic BP.}
    \end{subfigure}
    \caption{Experimental results for BP with coordination using splashes. The dataset is a 400x400 image.}
    \label{exp:splashbp}
@@ -163,7 +161,7 @@ In summary, using a small set of action facts and derivation rules we were able 
 scheduling strategies similar to the ones present in GraphLab, a practical and powerful machine learning
 framework.
 
-\section{Language expressiveness and conciseness}
+\section{Language Expressiveness and Conciseness}
 
 Finally, we show some results comparing the size of \lang programs against implementations of the same
 programs in other languages. We want to show that \lang programs are more concise and can also be run in parallel from the start.

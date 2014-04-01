@@ -51,7 +51,7 @@
 % Provides a draft mark at the top of the document. 
 \draftstamp{\today}{DRAFT}
 
-\begin {document} 
+\begin{document} 
 \frontmatter
 
 %initialize page style, so contents come out right (see bot) -mjz
@@ -59,18 +59,18 @@
 
 \title{{\it \huge Thesis Proposal}\\
 {\bf Linear Logic and Coordination for Parallel Programming}}
-\author{Flavio Manuel Fernandes Cruz}
-\date{January 2014}
+\author{Fl\'{a}vio Manuel Fernandes Cruz}
+\date{March 2014}
 \Year{2014}
 \trnumber{}
 
 \committee{
-Frank Pfenning\\
-Seth Goldstein\\
-Ricardo Rocha\\
-Luis Barbosa\\
-Carlos Guestrin\\
 Umut Acar\\
+Luis Barbosa\\
+Seth Goldstein\\
+Carlos Guestrin\\
+Frank Pfenning\\
+Ricardo Rocha\\\
 }
 
 \support{}
@@ -127,6 +127,10 @@ Umut Acar\\
 
 \chapter{Introduction}
 \input{introduction}
+
+\chapter{Related Work}
+
+\input{related_work}
 
 \chapter{Linear Meld}
 \input{language}

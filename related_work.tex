@@ -1,7 +1,7 @@
-We next give an overview of the related work including declarative languages, programming models
-based on graphs, linear logic, coordination and provability.
+We next give a brief introduction to the key concepts of declarative programming, graph-based programming models,
+linear logic, coordination and provability.
 
-\subsection{Declarative Programming}
+\section{Declarative Programming}
 
 Many programming models have been developed in order to make parallel programs both easier to write and reason about. The most popular examples of such paradigms are \emph{logic programming} and \emph{functional programming}.
 In logic languages such as Prolog, researchers took advantage of the non-determinism of proof-search to evaluate subgoals
@@ -21,12 +21,14 @@ Traditionally used in deductive databases, it is now being increasingly used in 
 such as distributed networking~\cite{Loo-condie-garofalakis-p2}, sensor
 nets~\cite{Chu:2007:DID:1322263.1322281} and cloud computing~\cite{alvaro:boom}.
 
-\subsection{Graph-Based Programming Models}
+\section{Graph-Based Programming Models}
 
-Like Meld, many programming systems also model the application as a graph where computation will be performed.
+Like the original Meld, many programming systems also model the application as a graph where computation will be performed.
+Some good examples are the Dryad, Pregel and GraphLab systems.
+
 The Dryad system~\cite{Isard:2007:DDD:1272996.1273005} combines computational vertices
 with communication channels (edges) to form a data-flow graph. The program is scheduled to
-run on multiple computers or cores and data is partitioned during runtime. Routines that run on computational vertices
+run on multiple processors or cores and data is partitioned during runtime. Routines that run on computational vertices
 are sequential, with no synchronization.
 
 The Pregel system~\cite{Malewicz:2010:PSL:1807167.1807184} is also graph based, although programs have a more strict
@@ -41,7 +43,7 @@ data, others may need to update edge information. Each consistency model will pr
 guarantees that are better adapted to some algorithms. GraphLab also provides different
 schedulers that dictate the order in which node's are computed.
 
-\subsubsection{Languages for Sensor Networks}
+\section{Languages for Sensor Networks}
 
 Sensor nets are another interesting domain for programming languages that deal with graph-like networks.
 Programming languages such as Hood~\cite{Whitehouse:2004:HNA:990064.990079}, Tinydb~\cite{Madden:2005:TAQ:1061318.1061322}
@@ -55,7 +57,7 @@ LDP is a language derived from a method for distributed debugging, that allows i
 on variably-sized groups of nodes. It is based on the tick model, generating a new set of condition matchers throughout the ensemble on each tick.
 Like Pleiades and LDP, Proto also compiles global programs into locally executed code.
 
-\subsection{Linear Logic}
+\section{Linear Logic}
 
 Linear logic is a substructural logic proposed by Jean-Yves Girard~\cite{Girard95logic:its} that extends intuitionistic logic with the concept of \emph{truth as resources}. Instead of seeing the truth as immutable, truth is now something that can be consumed during the proof process.
 
@@ -79,11 +81,11 @@ the program's database is both the state and the program, because it drives the 
 new language can also interact with the outside world through sensing and action facts, which are special facts that return information
 about the world and act on the outside world, respectively.
 
-\subsection{Coordination}
+\section{Coordination}
 
 Many programming languages follow what is called the coordination paradigm~\cite{Papadopoulos98coordinationmodels}. This form of distributed
-programming divides execution in two parts: computation, where the actual computation is performed, and
-coordination, which deals with communication and cooperation between processing units. This paradigm attempts to clearly distinguish between
+programming divides execution in two parts: \emph{computation}, where the actual computation is performed, and
+\emph{coordination}, which deals with communication and cooperation between processing units. This paradigm attempts to clearly distinguish between
 these two parts by providing abstractions for coordination in an attempt to provide architecture and system-independent forms of communication.
 
 We can identify two main types of coordination models:
@@ -115,7 +117,7 @@ The proposed LM language also implements communication rules, however it goes fu
 some facts, action facts, can change how the processing units schedule nodes to be executed, namely, which node is to be computed next, which may in turn change
 the program's final result. This result in a more complete inter-play between coordination code and data.
 
-\subsection{Provability}
+\section{Provability}
 
 Many techniques and formal systems have been devised to help reason about parallel programs.
 One such example is the Owicki-Gries~\cite{Owicki:1976:VPP:360051.360224} deductive system
@@ -147,4 +149,4 @@ a logic system designed for analyzing program logics and logic program implement
 For instance, a meta-module based shape planner program was proven to be correct~\cite{dewey-iros08,ashley-rollman-iclp09}
 under the assumption that actions derived by the program are always successfully applied in the outside world.
 While the fault tolerance aspect is lax, the planner will always reach the target shape in finite time.
-The sketch of the proof is presented in Dewey et al~\cite{dewey-iros08}.
+The sketch of the proof is presented in Dewey et al.~\cite{dewey-iros08}
