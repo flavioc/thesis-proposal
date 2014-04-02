@@ -126,14 +126,42 @@ The database must be implemented efficiently because during matching of rules, w
    data structure.
 \end{description}
 
-Whenever we add a new fact to a node, we update the set of candidate rules. This set is represented as a bitmap.
-To apply the rules, we take the least significant rule from the bitmap and then run it.
-If the derivation was successful, new facts may have been derived, thus we need to consider new
-rules that are candidates from the newly derived facts and add them to the rule's bitmap.
-On the other hand, when linear facts are consumed, some rules may not be applicable anymore and thus
-we may need to remove them from the bitmap. In our implementation,
-we keep a fact count for each predicate per node and also bitmap to mark which predicates are needed for each rule. Whenever we have facts of some
-predicates we can efficiently check if new rules are applicable for a specific node.
+The core engine decides which rules need to be executed and then executes their byte-code.
+In Fig.~\ref{fig:rule_engine} we present the 5 main data structures for scheduling rule execution.
+\emph{Rule Queue} is the bitmap representing the rules that will be run, \emph{Active Bitmap} contains the rules that have enough
+facts to be fired, \emph{Inactive Bitmap} contains the rules that must be dropped from \emph{Rule Queue}, \emph{Predicates Bitmap}
+marks the newly derived facts and \emph{Predicates Count} counts the number of facts per predicate.
+To understand how our engine works, consider
+the following small program:
+
+\begin{Verbatim}
+a, e(1) -o b.
+a -o c.
+b -o d.
+e(0) -o f.
+c -o e(1).
+\end{Verbatim}
+
+To apply the rules, we take the least significant rule from the bitmap, which is the candidate rule with the higher priority, and then run it. In our example, we need to execute the second rule \texttt{a -o c}, since we have facts \texttt{a} and \texttt{e(0)}.
+Because the derivation is successful, we derive \texttt{c} and consume \texttt{a}. In Fig.~\ref{fig:rule_engine}~(b) we
+activate the \texttt{c} predicate in the \emph{Predicates Bitmap} since it was derived and then activate the first and second rules
+in \emph{Dropped Bitmap} since such rules are no longer applicable (\texttt{a} is gone). To update the \emph{Rule Queue},
+we remove the bits marked in \emph{Dropped Bitmap} and add the active rules marked in \emph{Active Bitmap} that are affected
+by predicates in \emph{Predicates Map}. The engine has now scheduled the fourth and fifth rules to be run.
+
+\begin{figure*}[h]
+   \centering
+   \begin{subfigure}[b]{0.4\textwidth}
+      \includegraphics[width=\textwidth]{rule_queue1.pdf}
+      \caption{Before applying the second rule.}
+   \end{subfigure}
+   \begin{subfigure}[b]{0.4\textwidth}
+      \includegraphics[width=\textwidth]{rule_queue2.pdf}
+      \caption{After applying the second rule.}
+   \end{subfigure}
+   \caption{Rule engine main data structures.}
+   \label{fig:rule_engine}
+\end{figure*}
 
 We do a small optimization to reduce the number of derivations of persistent facts. We
 divide the program rules into two sets: \emph{persistent rules} and \emph{non persistent rules}.

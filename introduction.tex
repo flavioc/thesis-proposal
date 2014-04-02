@@ -45,14 +45,15 @@ the runtime system and how the system manages parallelism.
 In this proposal, we present Linear Meld (LM), a new language for parallel programming that extends the
 original Meld with linear logic. Linear logic gives the language a structured
 way to manage state, allowing the programmer to derive and delete logical facts.
-While the new language retains the declarative aspects of Meld due to the introduction of linear logic, but also adds explicit programmer control and opportunities for optimization that arise with stateful programs.
+While the new language retains the declarative aspects of Meld due to the introduction of linear logic, it also adds explicit programmer control and opportunities for optimization that arise with stateful programs.
 We reuse the concept of action facts, present in the original Meld, in order to pass scheduling decisions to
-the runtime system. We intend to introduce opportunities for program optimization, improved data partitioning and
+the runtime system and introduce opportunities for program optimization, improved data partitioning and
 parallel scheduling by using the same logical code used for standard computation.
 
-In particular, we are interested in efficiently executing graph-based algorithms on multicores. The original Meld is a good
-starting point because it sees a distributed program as a network of processing units, therefore
-there is a naturally mapping to these kinds of algorithms.
+Since the original Meld sees a distributed program as a network of processing units, graph-based algorithms fit naturally with LM.
+In particular, we are most interested in efficiently executing graph-based algorithms on multicores and for that
+we have written graph algorithms, search algorithms and machine learning algorithms and have
+seen good results on multicores, although our runtime system can be easily extended to other distributed architectures.
 
 \section{Thesis Statement}
 

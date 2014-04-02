@@ -4,7 +4,6 @@ to efficiently execute and scale parallel graph based programs on multicore arch
 We argue that LM is a suitable declarative programming model and that the logical foundations
 of LM can be leveraged to make programs more expressive and faster to execute when compared to implementations
 in other declarative languages.
-
 We will prove our thesis through five major goals:
 
 \begin{itemize}
@@ -32,12 +31,12 @@ We will prove our thesis through five major goals:
    distances to the source node before other nodes, so that convergence is reached faster.
    We also use action facts to model output and to visualize the program's behavior in the
    interfaces that we have built. We intend to add more coordination directives and action facts
-   and also write more programs that take advantage of coordination.
+   and also write more programs that can take advantage of coordination.
 
    \item Fast Sequential Execution (partly done)
    
    Since LM uses logical rules to perform computation, many program optimizations are possible. The use of linear logic
-   opens a new opportunities for code improvement since linear logic has some similarities with imperative programming.
+   opens new opportunities for code improvement since linear logic has some similarities with imperative programming.
    We have already explored some potential optimizations in our implementation, including detecting cases where a fact
    is re-derived with modified arguments. We intend to explore further optimizations, including whole-program optimizations.
    
