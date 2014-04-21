@@ -122,7 +122,7 @@ The database must be implemented efficiently because during matching of rules, w
    When a double linked list is too long and we need to search for facts by a fixed argument, it becomes very slow to go through the
    linked list and find the matched facts. To fix this, the virtual machine decides which arguments are best to be indexed and then
    uses an hash table indexed by the appropriate argument. If we need to look for such argument then we just lookup in the hash table. However,
-   if we need to go through all the facts, we just iterate through all the facts in the table. For collisions, we use the above doubly linked
+   if we need to go through all the facts, we just iterate through all the facts in the table. For collisions, we use the above doubly linked list
    data structure.
 \end{description}
 

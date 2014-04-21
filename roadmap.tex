@@ -20,6 +20,10 @@ We want to implement more programs that use coordination. By implementing new pr
 extend the set of coordination directives and find out which action or sensing facts may be
 appropriate in our system. We are specially interested in designing more sensing and action
 facts that place nodes in specific threads to improve data locality.
+For instance, some multicore architectures employ a cache hierarchy where cores are clustered,
+therefore some pairs of clusters will communicate faster. It might be a good idea to give the programmer
+access to the graph of processing units or allow a processing unit to be placed on certain
+cores in order to improve computation time.
 
 A potential algorithm that we can implement is the Alpha-Beta search algorithm
 that allows us to reduce the search space by prioritizing certain tree branches. However, it remains to be
@@ -156,25 +160,20 @@ If the time allows, we also want to write correctness and termination proofs for
 The proposed work is scheduled on a 12 month timeline ending May 2015.
 
 \begin{itemize}
-   \item \textbf{Spring 2014}
-      
-   Perform the overhead and scalability analysis for the current set of \lang programs.
-   Spend some time thinking about how threads could efficiently share coordination data.
-
-   \textbf{Checkpoint}: new benchmarks for \lang programs taking into account the new optimizations.
-
    \item \textbf{Summer 2014}
-
-   Write a few more programs using coordination.   
-   Meanwhile extend the set of coordination directives that will help implement the new programs.
    
-   Design a set of invariant optimizations and implement them in the compiler. Meanwhile, benchmark the runtime of programs to see how they improve the execution.
+   Measure the sources of overhead of the virtual machine and apply the required optimizations to fix them.
 
-   \textbf{Checkpoint}: new benchmarks for \lang programs and their comparison against other implementations.
+   Improve the scalability of current coordination mechanisms and write a few more programs using coordination
+   directives. Meanwhile extend the set of coordination directives that will help implement the new programs.
+
+   \textbf{Checkpoint}: new LM programs and benchmarks.
    
    \item \textbf{Fall 2014}
    
-   Continue working on invariant optimizations and scalability optimizations.
+   Design a set of invariant optimizations and implement them in the compiler. Meanwhile, benchmark the runtime of programs to see how they improve the execution.
+   
+   Continue working on scalability optimizations.
    Build website for \lang and then make \lang publicly available.
    
    \textbf{Checkpoint}: The \lang website. Improved benchmark results for \lang programs.

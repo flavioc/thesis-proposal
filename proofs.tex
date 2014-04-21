@@ -187,7 +187,7 @@ The aggregate is initiated as $\compr{C} \; 0$.
 
 In this section, we are going to present the high level dynamic semantics of \lang. The semantics
 formalize the mechanism of matching rules and deriving new facts. The high level semantics
-present a simplified overview of the dynamics of the language that are more closer to the formalism
+present a simplified overview of the dynamics of the language that are closer to the formalism
 of linear logic present in Fig.~\ref{linear_logic} than the implementation principles of our
 virtual machine.
 
@@ -202,7 +202,7 @@ facts. We assume that the rules of the program are persistent linear implication
 $\bang (A \lolli B)$ that can be used several times. However, we do not put the rules in the $\Gamma$
 context but in a separate context $\Phi$.
 
-The main idea of the dynamic semantics is to mostly ignore the right side of the sequent calculus
+The main idea of the dynamic semantics is to ignore the right side of the sequent calculus
 and use inversion on the $\Delta$ and $\Gamma$ context so that we only have atomic facts.
 To apply rules we use chaining by focusing on one of the derivation rules in $\Phi$. Note
 that in the focusing process we assume that all the atoms (facts) are positive thus the chaining
@@ -218,27 +218,29 @@ facts. Note that for the high level semantics there is no concept of rule priori
 non-deterministically.
 
 The judgment $\az \Gamma ; \Delta ; A \lolli B \rightarrow \Xi'; \Delta'; \Gamma'$ will attempt to apply
-the derivation rule $A \lolli B$. To do this, it splits the $\Delta$ context into two, namely the
-set of linear resources consumed to match the body of the rule and the remaining facts. Again, the
-set of resources needed to match the body of the rule is guessed. The low level dynamic semantics will
-handle this.
+the derivation rule $A \lolli B$. To do this, it splits the $\Delta$ context into $\Delta_1$ and $\Delta_2$, namely the
+set of linear resources consumed to match the body of the rule ($\Delta_1$) and the remaining linear facts ($\Delta_2$).
+Again, the set of resources needed to match the body of the rule is guessed. The low level dynamic semantics will
+deterministically determine $\Delta_1$.
 
 \[
 \infer[\az rule]
-{\az \Gamma ; \Delta, \Delta'' ; A \lolli B \rightarrow \Xi' ; \Delta' ; \Gamma'}
-{\mz \Gamma ; \Delta ; A \rightarrow \Delta & \dz \Gamma ; \Delta''; \Delta; \cdot ; \cdot ; B \rightarrow \Xi' ; \Delta' ; \Gamma'}
+{\az \Gamma ; \Delta_1, \Delta_2 ; A \lolli B \rightarrow \Xi' ; \Delta' ; \Gamma'}
+{\mz \Gamma ; \Delta_1 \rightarrow A & \dz \Gamma ; \Delta_2; \Delta_1; \cdot ; \cdot ; B \rightarrow \Xi' ; \Delta' ; \Gamma'}
 \]
 
 \[
 \infer[\doz rule]
 {\doz \Gamma ; \Delta ; R, \Phi \rightarrow \Xi' ; \Delta' ; \Gamma'}
-{\doz \Gamma ; \Delta ; R \rightarrow \Xi' ; \Delta' ; \Gamma'}
+{\az \Gamma ; \Delta ; R \rightarrow \Xi' ; \Delta' ; \Gamma'}
 \]
 
 \subsubsection{Match}
 
-The $\mz \Gamma ; \Delta \rightarrow C$ judgment essentially uses the right rules of the original
-linear logic fragment in order to match all facts using $\Gamma$ and $\Delta$.
+The $\mz \Gamma ; \Delta \rightarrow C$ judgment essentially uses the right ($R$) rules of the original
+linear logic fragment in order to match all facts using $\Gamma$ and $\Delta$. We must consume all the linear facts in
+the multi-set $\Delta$ when matching $C$. The context $\Gamma$ may be used to match persistent terms in $C$ but such
+facts are never consumed since they are persistent.
 
 \[
 \infer[\mz 1]
@@ -341,7 +343,7 @@ should be applied because it is entirely non-deterministic.
 
 \section{Low Level Dynamic Semantics}
 
-The low level dynamic semantics remove all the non-deterministic choices in the previous dynamics
+The low level dynamic semantics removes all the non-deterministic choices in the previous dynamics
 and makes them deterministic. The new semantics will do the following:
 
 \begin{itemize}
@@ -350,20 +352,19 @@ and makes them deterministic. The new semantics will do the following:
    \item Apply as many comprehensions as the database allows.
 \end{itemize}
 
-The complete set of inference rules for the semantics are presented in Appendix~\ref{low_level_semantics}
-since it is too long to be shown here.
+The complete set of inference rules for the semantics are presented in Appendix~\ref{low_level_semantics}.
 
 \subsection{Continuation Frames}
 
 The new semantics introduce the concept of continuation frames. Continuation frames are choice points
-created when we need to match some fact template against the database. The frame considers all the facts
-relevant to the template given the current variable bindings, that may or not fail during the remaining matching process. Note that we assume
+created when we need to match some fact expression against the database. The frame considers all the facts
+relevant to the fact expression given the current variable bindings, that may or not fail during the remaining matching process. Note that we assume
 that facts have arguments and variable bindings although this is not explicit in the semantics
 presented in the Appendix.
 The frame contains enough state to resume the matching process at the time of its creation and
 to select the next candidate fact from the database.
 
-If at some point we cannot match a fact template due to a wrong choice that happened earlier on,
+If at some point we cannot match a fact expression due to a wrong choice that happened earlier on,
 we need to backtrack (judgment $\m{cont}$ or $\m{contc}$). Since we keep all the continuation frames in a continuation stack,
 we grab the top frame and select the next fact candidate to complete the matching process.
 If all candidates are exhausted, we pop the current frame and try the next one.
@@ -382,11 +383,11 @@ Linear frames have the form $(\Delta; \Delta_{next}; p; \Omega; \Xi; \Lambda; \U
 \begin{enumerate}
    \item[$\Delta$] Contains all the linear resources available at this choice point minus the other facts that can used to match $p$ (they are in $\Delta_{next}$).
    \item[$\Delta_{next}$] The available options to match fact $p$ if the matching fails. When backtracking, we move one fact from $\Delta_{next}$ into $\Delta$.
-   \item[$p$] The fact template that created this frame.
+   \item[$p$] The fact expression that created this frame.
    \item[$\Omega$] Ordered list with the remaining terms we have to match to complete the matching process.
    \item[$\Xi$] Multi-set of consumed linear facts up to this choice point.
-   \item[$\Lambda$] Multi-set of linear fact templates already matched. All those terms must have a matching fact in $\Xi$.
-   \item[$\Upsilon$] Multi-set of persistent fact templates already matched. All those terms must have a matching fact in $\Gamma$.
+   \item[$\Lambda$] Multi-set of linear fact expressions already matched. All those terms must have a matching fact in $\Xi$.
+   \item[$\Upsilon$] Multi-set of persistent fact expressions already matched. All those terms must have a matching fact in $\Gamma$.
 \end{enumerate}
 
 Persistent frames are simpler with the form $[\Gamma_{next}; \Delta; \bang p; \Omega; \Xi; \Lambda; \Upsilon]$, where:
@@ -394,7 +395,7 @@ Persistent frames are simpler with the form $[\Gamma_{next}; \Delta; \bang p; \O
 \begin{enumerate}
    \item[$\Gamma_{next}$] The multi-set of available options for $\bang p$ if the current matching process fails.
    \item[$\Delta$] The multi-set of linear resources still available when the frame was created.
-   \item[$\bang p$] The fact template that created this frame.
+   \item[$\bang p$] The fact expression that created this frame.
 \end{enumerate}
 
 All the other arguments are equal to the ones used in the linear continuation frame.

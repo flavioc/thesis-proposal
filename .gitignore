@@ -15,5 +15,6 @@ proposal.pdf
 *.out
 *.tui
 *.top
+*.brf
 *mpgraph.mp
 *.synctex.gz
