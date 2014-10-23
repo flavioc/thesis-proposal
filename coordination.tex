@@ -52,8 +52,8 @@ to express coordination policies. \lang provides the following two
 sensing facts:
 
 \begin{description}
-   \item[\texttt{type linear cpu-id(node, node, int).}] The third argument indicates the worker's ID where the node of the second argument is currently running.
-   \item[\texttt{type linear priority(node, node, float).}] The third argument is the current priority of the node in the second argument.
+   \item[\texttt{type linear cpu-id(node, node, int)}]: The third argument indicates the worker's ID where the node of the second argument is currently running.
+   \item[\texttt{type linear priority(node, node, float)}]: The third argument is the current priority of the node in the second argument.
 \end{description}
 
 Note that when sensing facts are consumed, they are re-derived automatically, except if the programmer explicitly tells the compiler otherwise. 
