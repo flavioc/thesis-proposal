@@ -1,0 +1,252 @@
+\documentclass[10pt]{article}
+
+\usepackage{footnote}
+\usepackage{url}
+\usepackage{wrapfig}
+\usepackage{subfig}
+\usepackage{graphicx}
+\usepackage[hmargin=3cm,vmargin=3.5cm]{geometry}
+\title{Linear Logic and Coordination for Parallel Programming}
+
+\author{Flavio Cruz}
+
+\begin{document}
+
+\maketitle
+
+The purpose of this document is to clarify and re-state the thesis statement
+presented in the old proposal document~\footnote{Available in
+   \url{http://www.andrew.cmu.edu/user/fmfernan/proposal.pdf}}. We also discuss
+   the latest work done to accomplish the thesis goals.
+
+\section{Thesis Statement}
+
+We propose Linear Meld (LM), a new linear logic programming language, designed
+to write parallel graph based programs on multicores.  We argue that LM is a
+superior declarative programming model because it not only automatically
+parallelizes programs, but, in cases where it is necessary, it allows the
+programmer to control parallel scheduling and placement of data to further
+improve the program run time and scalability.  Since LM is based on solid
+logical foundations, we argue that we can also prove interesting properties of
+programs, including correctness and termination. We will prove our thesis
+through five major goals:
+
+\begin{itemize}
+   
+   \item Linear Logic (mostly done)
+
+   We integrated linear logic into our language, so that program state can be
+   encoded naturally. The original Meld was fully based on classical logic where
+   everything that is derived is true forever. Linear logic turns some facts
+   into resources that will be consumed when a rule is applied.  To the best of
+   our knowledge, LM is the first linear logic based language implementation
+   that attempts to solve real world problems.
+
+   \item Coordination (partly done)
+   
+   LM offers execution control to the programmer through the use of coordination
+   directives to make the program faster and more scalable. These coordination
+   directives change how the runtime system schedules computation and can be
+   written with the same facilities used to write standard program code.  We are
+   using the concept of \emph{action facts} to coordinate the execution of
+   programs.  We can increase the priority of certain nodes during runtime
+   according to the state of the computation and to the state of the runtime in
+   order to make better scheduling decisions so that programs can run faster.
+   We intend to add more coordination directives and action facts and also write
+   more programs that can take advantage of coordination.
+   
+   \item Provability (partly done)
+   
+   Since LM is a logic programming language, we want to leverage the logical
+   foundations of the language to show how to prove properties of a few
+   programs. We are mostly interested in proving correctness and termination.
+   We also want to show that coordination directives do not change those
+   correctness proofs of programs but only improve run time or scalability.
+
+   \item Multicore Parallelism (partly done)
+   
+   We divide the logical facts across all the nodes of the graph. Since the
+   logical rules only make use of data local to a node, computation can be
+   performed at the node level, without reference from other nodes of the graph.
+   We envision the application as a communicating graph data structure where
+   each processing unit performs work on a different subset of the graph, thus
+   creating parallelism. This is an advantage of LM since we can run programs on
+   many different types of distributed systems as long as the underlying runtime
+   system uses the appropriate communication facilities.
+
+   \item Experimental Results (partly done)
+
+   We have implemented a new compiler and a virtual machine prototype from
+   scratch that executes on multicore machines.  We have implemented programs
+   such as belief propagation, belief propagation with residual splash,
+   PageRank, graph coloring, N queens, shortest path, diameter estimation,
+   MapReduce, game of life, quick-sort, neural network training, among others.
+   Our preliminary results show that our particular implementation makes
+   programs scalable with up to 16 threads. We intend to further improve the
+   scalability of our virtual machine.
+   
+\end{itemize}
+
+\section{Road Map}
+
+The thesis roadmap has three major goals.
+
+\subsection{First Major Goal: Improve Coordination Mechanisms and Programs}
+
+The LM runtime is able to scale programs reasonably well in multicore
+architectures. The use of coordination directives also has the potential to
+improve the execution time of programs, although it is less impressive when
+adding more threads to the system. Therefore, our first major goal is to improve
+the efficiency of coordination directives and associated coordination code.
+
+We want to implement more programs that use coordination. By implementing new
+programs we can extend the set of coordination directives and find out which
+action or sensing facts may be appropriate in our system. We are specially
+interested in designing more sensing and action facts that place nodes in
+specific threads to improve data locality.  For instance, some multicore
+architectures employ a cache hierarchy where cores are clustered, therefore some
+pairs of clusters will communicate faster. It might be a good idea to give the
+programmer access to the graph of processing units or allow a processing unit to
+be placed on certain cores in order to improve computation time.
+
+A potential algorithm that we can implement is the Alpha-Beta search algorithm
+that allows us to reduce the search space by prioritizing certain tree branches.
+However, it remains to be seen if the program can be easily implemented in LM.
+We intend to measure the execution speedup of these new coordinated programs.
+
+\subsection{Second Major Goal: Improve General Scalability}
+
+Our second goal is to improve the overall scalability of the system, specially
+when using more than 16 threads. To accomplish this, we first need to understand
+how threads communicate, specially in terms of node stealing and load balancing.
+For instance, our simple node stealing algorithm needs to be revamped in order
+to use better stealing heuristics such as stealing nodes that are closer (in
+terms of connections) to the thread's set of owned nodes. Currently, each
+thread steals one node from one random thread.
+
+\subsection{Third Major Goal: Prove Program Properties}
+
+We want to take a few programs and show how to prove their correctness and
+termination properties.  Good candidates include the shortest distance
+algorithm, the quick-sort algorithm, the minimax algorithm and the heat transfer
+algorithm. We are also interested in proving that adding coordination directives
+to some of these programs does not change their correctness proofs and only
+improve the convergence time or scalability.
+
+\section{New developments}
+
+In the current semester, we have been working towards the three major goals.
+
+\subsection{Experimental Results}
+
+\begin{figure*}[]
+\begin{center}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/pagerank-search_engines}}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/pagerank-5000}}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/8queens-13}}
+\end{center}
+\caption{New experimental results for PageRank and N Queens.}
+\label{fig:res1}
+\end{figure*}
+
+\begin{figure*}[h]
+\begin{center}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/shortest-uspowergrid}}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/greedy-graph-coloring-search_engines}}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/greedy-graph-coloring-2000}}
+\end{center}
+\caption{New experimental results for Single Source Shortest Distance and Greedy Graph Coloring.}
+\label{fig:res2}
+\end{figure*}
+
+In order to improve the scalability of our runtime, we made several adjustments
+to the virtual machine. Most of the performance enchancements deal with improved
+memory organization, less thread communication, improved work stealing, improved
+locks and an overall increase of parallelism. We compared the scalability of the
+improved version against the scalability of the old version and the results are
+shown in Fig.~\ref{fig:res1}, Fig.~\ref{fig:res2} and Fig.~\ref{fig:res3}. The
+overall speedup for 16 threads has improved from 9.25 to a 11.75-fold speedup.
+
+\begin{figure*}[ht]
+\begin{center}
+\end{center}
+\begin{center}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/new-heat-transfer-80}}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/min-max-tictactoe}}
+\end{center}
+\caption{New experimental results for Heat Transfer and MiniMax.}
+\label{fig:res3}
+\end{figure*}
+
+We also measured the impact of our new optimizations when executing the programs
+with a single thread. The results presented in Fig.~\ref{fig:seq} indicate
+that the sequential execution speed was preserved for most programs and some
+programs even got slightly faster.
+
+\begin{figure}[b]
+\begin{center}
+   \includegraphics[width=0.9\textwidth]{figures/comparison1}
+\end{center}
+\caption{Sequential performance of our programs after improving scalability.
+   When the "New" value is greater than 1, it means that the new sequential
+   execution runs slower than before. Otherwise, values less than 1 mean that it
+   now runs faster.}
+\label{fig:seq}
+\end{figure}
+
+\subsection{Program Proofs}
+
+We are also focused on proving that our programs are correct and for that we
+proved that the following programs are indeed correct: bipartiteness checking,
+shortest path, N queens and quicksort. Most of the proofs are relatively
+short because the programs themselves are also short.
+
+\subsection{New Coordination Directives}
+
+We have developed some new coordination directives that allows to further
+optimize scalability, memory usage and runtime of our programs. We added the
+following action facts to our language:
+
+\begin{description}
+   \item[set-cpu(A, P)]: Place node \texttt{A} in thread \texttt{P}. Node
+   \texttt{A} can no longer be moved to another thread.
+   \item[set-affinity(A, B)]: Place node \texttt{A} in the same thread where
+   \texttt{B} is currently located.
+   \item[set-static(A)]: Do not allow node \texttt{A} to be moved to another
+   thread.
+   \item[set-moving(A)]: Allow node \texttt{A} to be moved around.
+   \item[set-default-priority(A, P)]: Set the default priority of node
+   \texttt{A} to \texttt{P}. The priority is always used whenever the node is to
+   be scheduled for further derivations.
+\end{description}
+
+As we have seen, most of the new directives (except the last one) deal with node
+positioning and affinity. This a nice addition to our language since most
+coordination directives we already had were related to computation scheduling
+and not partitioning.
+
+\begin{wrapfigure}{L}{0.5\textwidth}
+  \begin{center}
+   \includegraphics[width=0.5\textwidth]{figures/coord_min-max-tictactoe}
+\end{center}
+\caption{Scalability and performance gains by using coordination in the MiniMax
+   program. The speedup of the regular and coordinated version is calculated
+   from the sequential execution time of the regular version. The coordinated
+   version with 16 threads is 16 times faster than the regular version without
+   coordination using a single thread.}
+\label{fig:coord}
+\end{wrapfigure}
+
+We have been experimenting with the new coordination directives and we have been
+exploring programs that may benefit from them. One good example is the MiniMax
+program shown in Fig.~\ref{fig:coord}. We coordinated the program so that deeper
+nodes have a higher priority than the nodes closer to the root of the tree. This
+forces the virtual machine to expand the search tree using a depth-first
+approach, thus reducing the size of the tree that needs to be kept in memory. We
+have seen a huge reduction in terms of memory usage: the original version used
+around 13GB of memory, while the coordinated version uses only a few MBs. We
+also fine tuned parallel execution by forcing deeper nodes to be kept in the
+same thread, improving memory locality. These new coordination directives allows
+us to reach linear scalability, as it can be seen from Fig.~\ref{fig:coord}.
+
+\end{document}
