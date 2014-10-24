@@ -91,12 +91,15 @@ through five major goals:
 
 The thesis roadmap has three major goals.
 
-\subsection{First Major Goal: Improve Coordination Mechanisms and Programs}
+\subsection{First Major Goal: Improved Coordination Mechanisms and Programs}
 
 The LM runtime is able to scale programs reasonably well in multicore
-architectures. The use of coordination directives also has the potential to
-improve the execution time of programs, although it is less impressive when
-adding more threads to the system. Therefore, our first major goal is to improve
+architectures. The use of coordination directives further improves the execution
+time, scalability and memory use of programs by allowing the programmer to
+fine tune them with sensing and action facts.
+However, there's still some scalability issues in our implementation that reduce the applicability of
+coordination when dealing with coordination information that must be
+exchanged between threads. Our first major goal is thus to improve
 the efficiency of coordination directives and associated coordination code.
 
 We want to implement more programs that use coordination. By implementing new
@@ -114,7 +117,7 @@ that allows us to reduce the search space by prioritizing certain tree branches.
 However, it remains to be seen if the program can be easily implemented in LM.
 We intend to measure the execution speedup of these new coordinated programs.
 
-\subsection{Second Major Goal: Improve General Scalability}
+\subsection{Second Major Goal: Improved General Scalability}
 
 Our second goal is to improve the overall scalability of the system, specially
 when using more than 16 threads. To accomplish this, we first need to understand
@@ -122,86 +125,22 @@ how threads communicate, specially in terms of node stealing and load balancing.
 For instance, our simple node stealing algorithm needs to be revamped in order
 to use better stealing heuristics such as stealing nodes that are closer (in
 terms of connections) to the thread's set of owned nodes. Currently, each
-thread steals one node from one random thread.
+thread steals half of the nodes available from a random thread.
 
-\subsection{Third Major Goal: Prove Program Properties}
+\subsection{Third Major Goal: Proofs of Interesting Program Properties}
 
 We want to take a few programs and show how to prove their correctness and
-termination properties.  Good candidates include the shortest distance
+termination.  Good candidates include the shortest distance
 algorithm, the quick-sort algorithm, the minimax algorithm and the heat transfer
 algorithm. We are also interested in proving that adding coordination directives
 to some of these programs does not change their correctness proofs and only
 improve the convergence time or scalability.
 
-\section{New developments}
+\section{New Developments}
 
 In the current semester, we have been working towards the three major goals.
 
-\subsection{Experimental Results}
-
-\begin{figure*}[]
-\begin{center}
-  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/pagerank-search_engines}}
-  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/pagerank-5000}}
-  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/8queens-13}}
-\end{center}
-\caption{New experimental results for PageRank and N Queens.}
-\label{fig:res1}
-\end{figure*}
-
-\begin{figure*}[h]
-\begin{center}
-  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/shortest-uspowergrid}}
-  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/greedy-graph-coloring-search_engines}}
-  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/greedy-graph-coloring-2000}}
-\end{center}
-\caption{New experimental results for Single Source Shortest Distance and Greedy Graph Coloring.}
-\label{fig:res2}
-\end{figure*}
-
-In order to improve the scalability of our runtime, we made several adjustments
-to the virtual machine. Most of the performance enchancements deal with improved
-memory organization, less thread communication, improved work stealing, improved
-locks and an overall increase of parallelism. We compared the scalability of the
-improved version against the scalability of the old version and the results are
-shown in Fig.~\ref{fig:res1}, Fig.~\ref{fig:res2} and Fig.~\ref{fig:res3}. The
-overall speedup for 16 threads has improved from 9.25 to a 11.75-fold speedup.
-
-\begin{figure*}[ht]
-\begin{center}
-\end{center}
-\begin{center}
-  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/new-heat-transfer-80}}
-  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/min-max-tictactoe}}
-\end{center}
-\caption{New experimental results for Heat Transfer and MiniMax.}
-\label{fig:res3}
-\end{figure*}
-
-We also measured the impact of our new optimizations when executing the programs
-with a single thread. The results presented in Fig.~\ref{fig:seq} indicate
-that the sequential execution speed was preserved for most programs and some
-programs even got slightly faster.
-
-\begin{figure}[b]
-\begin{center}
-   \includegraphics[width=0.9\textwidth]{figures/comparison1}
-\end{center}
-\caption{Sequential performance of our programs after improving scalability.
-   When the "New" value is greater than 1, it means that the new sequential
-   execution runs slower than before. Otherwise, values less than 1 mean that it
-   now runs faster.}
-\label{fig:seq}
-\end{figure}
-
-\subsection{Program Proofs}
-
-We are also focused on proving that our programs are correct and for that we
-proved that the following programs are indeed correct: bipartiteness checking,
-shortest path, N queens and quicksort. Most of the proofs are relatively
-short because the programs themselves are also short.
-
-\subsection{New Coordination Directives}
+\subsection{Improved Coordination Mechanisms and Programs}
 
 We have developed some new coordination directives that allows to further
 optimize scalability, memory usage and runtime of our programs. We added the
@@ -248,5 +187,70 @@ around 13GB of memory, while the coordinated version uses only a few MBs. We
 also fine tuned parallel execution by forcing deeper nodes to be kept in the
 same thread, improving memory locality. These new coordination directives allows
 us to reach linear scalability, as it can be seen from Fig.~\ref{fig:coord}.
+
+\subsection{Improved General Scalability}
+
+\begin{figure*}[]
+\begin{center}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/pagerank-search_engines}}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/pagerank-5000}}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/8queens-13}}
+\end{center}
+\caption{New experimental results for PageRank and N Queens.}
+\label{fig:res1}
+\end{figure*}
+
+\begin{figure*}[h]
+\begin{center}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/shortest-uspowergrid}}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/greedy-graph-coloring-search_engines}}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/greedy-graph-coloring-2000}}
+\end{center}
+\caption{New experimental results for Single Source Shortest Distance and Greedy Graph Coloring.}
+\label{fig:res2}
+\end{figure*}
+
+In order to improve the scalability of our runtime, we made several adjustments
+to the virtual machine. Most of the performance enhancements deal with improved
+memory organization, less thread communication, improved work stealing, improved
+locks and elimination of sequential bottlenecks. We compared the scalability of the
+improved version against the scalability of the old version and the results are
+shown in Fig.~\ref{fig:res1}, Fig.~\ref{fig:res2} and Fig.~\ref{fig:res3}. The
+overall speedup for 16 threads has improved from 9.25 to a 11.75-fold speedup.
+
+\begin{figure*}[ht]
+\begin{center}
+\end{center}
+\begin{center}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/new-heat-transfer-80}}
+  \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/min-max-tictactoe}}
+\end{center}
+\caption{New experimental results for Heat Transfer and MiniMax.}
+\label{fig:res3}
+\end{figure*}
+
+We also measured the impact of our new optimizations when executing the programs
+with a single thread. The results presented in Fig.~\ref{fig:seq} indicate
+that the sequential execution speed was preserved for most programs and some
+programs even got slightly faster.
+
+\begin{figure}[b]
+\begin{center}
+   \includegraphics[width=0.9\textwidth]{figures/comparison1}
+\end{center}
+\caption{Sequential performance of our programs after improving scalability.
+   When the "New" value is greater than 1, it means that the new sequential
+   execution runs slower than before. Otherwise, values less than 1 mean that it
+   now runs faster.}
+\label{fig:seq}
+\end{figure}
+
+\subsection{Proofs of Interesting Program Properties}
+
+We are mostly focused on proving that our programs computed the intended result.
+We have proved informally this property for several programs, including
+bipartiteness checking, shortest path, N queens and quicksort.
+The proofs reason about the operational semantics of the language and tend to be
+relatively short.
 
 \end{document}
