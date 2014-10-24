@@ -5,10 +5,19 @@
 \usepackage{wrapfig}
 \usepackage{subfig}
 \usepackage{graphicx}
+\usepackage{hyperref}
 \usepackage[hmargin=3cm,vmargin=3.5cm]{geometry}
 \title{Linear Logic and Coordination for Parallel Programming}
 
-\author{Flavio Cruz}
+\author{Flavio Cruz \href{mailto:fmfernan@cs.cmu.edu}{(fmfernan@cs.cmu.edu)} \\\\
+\textbf{Committee}: \\
+Umut Acar\\
+Luis Barbosa\\
+Seth Goldstein\\
+Carlos Guestrin\\
+Frank Pfenning\\
+Ricardo Rocha\\\
+}
 
 \begin{document}
 
@@ -16,8 +25,13 @@
 
 The purpose of this document is to clarify and re-state the thesis statement
 presented in the old proposal document~\footnote{Available in
-   \url{http://www.andrew.cmu.edu/user/fmfernan/proposal.pdf}}. We also discuss
-   the latest work done to accomplish the thesis goals.
+\url{http://www.andrew.cmu.edu/user/fmfernan/proposal.pdf}}.
+In a nutshell, the thesis statement has changed from focusing on implementing the
+language efficiently to make programs more scalable. We also focus on proving that programs
+are correct and that adding coordination directives does not
+make the program incorrect but only make it better execution behavior (faster,
+      less memory, more scalable).
+We finally discuss the latest work done to accomplish the new thesis goals.
 
 \section{Thesis Statement}
 
@@ -81,9 +95,8 @@ through five major goals:
    such as belief propagation, belief propagation with residual splash,
    PageRank, graph coloring, N queens, shortest path, diameter estimation,
    MapReduce, game of life, quick-sort, neural network training, among others.
-   Our preliminary results show that our particular implementation makes
-   programs scalable with up to 16 threads. We intend to further improve the
-   scalability of our virtual machine.
+   Our preliminary results show that our particular implementation provides
+   good scalability with at least 16 threads.
    
 \end{itemize}
 
@@ -190,7 +203,15 @@ us to reach linear scalability, as it can be seen from Fig.~\ref{fig:coord}.
 
 \subsection{Improved General Scalability}
 
-\begin{figure*}[]
+In order to improve the scalability of our runtime, we made several adjustments
+to the virtual machine. Most of the performance enhancements deal with improved
+memory organization, less thread communication, improved work stealing, improved
+locks and elimination of sequential bottlenecks. We compared the scalability of the
+improved version against the scalability of the old version and the results are
+shown in Fig.~\ref{fig:res1}, Fig.~\ref{fig:res2} and Fig.~\ref{fig:res3}. The
+overall speedup for 16 threads has improved from 9.25 to a 11.75-fold speedup.
+
+\begin{figure*}[h]
 \begin{center}
   \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/pagerank-search_engines}}
   \subfloat[]{\includegraphics[width=0.3\textwidth]{figures/pagerank-5000}}
@@ -210,15 +231,7 @@ us to reach linear scalability, as it can be seen from Fig.~\ref{fig:coord}.
 \label{fig:res2}
 \end{figure*}
 
-In order to improve the scalability of our runtime, we made several adjustments
-to the virtual machine. Most of the performance enhancements deal with improved
-memory organization, less thread communication, improved work stealing, improved
-locks and elimination of sequential bottlenecks. We compared the scalability of the
-improved version against the scalability of the old version and the results are
-shown in Fig.~\ref{fig:res1}, Fig.~\ref{fig:res2} and Fig.~\ref{fig:res3}. The
-overall speedup for 16 threads has improved from 9.25 to a 11.75-fold speedup.
-
-\begin{figure*}[ht]
+\begin{figure*}[h]
 \begin{center}
 \end{center}
 \begin{center}
@@ -249,7 +262,7 @@ programs even got slightly faster.
 
 We are mostly focused on proving that our programs computed the intended result.
 We have proved informally this property for several programs, including
-bipartiteness checking, shortest path, N queens and quicksort.
+bipartiteness checking, shortest path, N queens and quick-sort.
 The proofs reason about the operational semantics of the language and tend to be
 relatively short.
 
