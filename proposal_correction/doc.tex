@@ -16,7 +16,7 @@ Luis Barbosa\\
 Seth Goldstein\\
 Carlos Guestrin\\
 Frank Pfenning\\
-Ricardo Rocha\\\
+Ricardo Rocha\\
 }
 
 \begin{document}
@@ -29,8 +29,8 @@ presented in the old proposal document~\footnote{Available in
 In a nutshell, the thesis statement has changed from focusing on implementing the
 language efficiently to make programs more scalable. We also focus on proving that programs
 are correct and that adding coordination directives does not
-make the program incorrect but only make it better execution behavior (faster,
-      less memory, more scalable).
+make the program incorrect but only provide better execution behavior (faster,
+      less memory usage, more scalable).
 We finally discuss the latest work done to accomplish the new thesis goals.
 
 \section{Thesis Statement}
@@ -75,16 +75,17 @@ through five major goals:
    foundations of the language to show how to prove properties of a few
    programs. We are mostly interested in proving correctness and termination.
    We also want to show that coordination directives do not change those
-   correctness proofs of programs but only improve run time or scalability.
+   correctness proofs of programs but only improve run time, scalability or
+   memory usage.
 
    \item Multicore Parallelism (partly done)
    
    We divide the logical facts across all the nodes of the graph. Since the
-   logical rules only make use of data local to a node, computation can be
-   performed at the node level, without reference from other nodes of the graph.
+   logical rules only make use of facts from a node, computation can be
+   performed locally, without reference from other nodes of the graph.
    We envision the application as a communicating graph data structure where
    each processing unit performs work on a different subset of the graph, thus
-   creating parallelism. This is an advantage of LM since we can run programs on
+   enabling concurrency. This is an advantage of LM since we can run programs on
    many different types of distributed systems as long as the underlying runtime
    system uses the appropriate communication facilities.
 
@@ -115,9 +116,8 @@ coordination when dealing with coordination information that must be
 exchanged between threads. Our first major goal is thus to improve
 the efficiency of coordination directives and associated coordination code.
 
-We want to implement more programs that use coordination. By implementing new
-programs we can extend the set of coordination directives and find out which
-action or sensing facts may be appropriate in our system. We are specially
+We want to implement more programs that use coordination in order to find out
+which new coordination facts may be appropriate in our system. We are specially
 interested in designing more sensing and action facts that place nodes in
 specific threads to improve data locality.  For instance, some multicore
 architectures employ a cache hierarchy where cores are clustered, therefore some
@@ -125,8 +125,8 @@ pairs of clusters will communicate faster. It might be a good idea to give the
 programmer access to the graph of processing units or allow a processing unit to
 be placed on certain cores in order to improve computation time.
 
-A potential algorithm that we can implement is the Alpha-Beta search algorithm
-that allows us to reduce the search space by prioritizing certain tree branches.
+A potential algorithm that we can implement is the Alpha-Beta search algorithm,
+since we are able to reduce the search space by prioritizing certain tree branches.
 However, it remains to be seen if the program can be easily implemented in LM.
 We intend to measure the execution speedup of these new coordinated programs.
 
@@ -137,8 +137,7 @@ when using more than 16 threads. To accomplish this, we first need to understand
 how threads communicate, specially in terms of node stealing and load balancing.
 For instance, our simple node stealing algorithm needs to be revamped in order
 to use better stealing heuristics such as stealing nodes that are closer (in
-terms of connections) to the thread's set of owned nodes. Currently, each
-thread steals half of the nodes available from a random thread.
+terms of connections) to the thread's set of owned nodes.
 
 \subsection{Third Major Goal: Proofs of Interesting Program Properties}
 
@@ -155,7 +154,7 @@ In the current semester, we have been working towards the three major goals.
 
 \subsection{Improved Coordination Mechanisms and Programs}
 
-We have developed some new coordination directives that allows to further
+We have specified new coordination directives that allows us to further
 optimize scalability, memory usage and runtime of our programs. We added the
 following action facts to our language:
 
@@ -173,21 +172,8 @@ following action facts to our language:
 \end{description}
 
 As we have seen, most of the new directives (except the last one) deal with node
-positioning and affinity. This a nice addition to our language since most
-coordination directives we already had were related to computation scheduling
-and not partitioning.
-
-\begin{wrapfigure}{L}{0.5\textwidth}
-  \begin{center}
-   \includegraphics[width=0.5\textwidth]{figures/coord_min-max-tictactoe}
-\end{center}
-\caption{Scalability and performance gains by using coordination in the MiniMax
-   program. The speedup of the regular and coordinated version is calculated
-   from the sequential execution time of the regular version. The coordinated
-   version with 16 threads is 16 times faster than the regular version without
-   coordination using a single thread.}
-\label{fig:coord}
-\end{wrapfigure}
+partitioning and affinity. This a nice addition to our language since most
+coordination directives we already had were related to computation scheduling.
 
 We have been experimenting with the new coordination directives and we have been
 exploring programs that may benefit from them. One good example is the MiniMax
@@ -199,7 +185,44 @@ have seen a huge reduction in terms of memory usage: the original version used
 around 13GB of memory, while the coordinated version uses only a few MBs. We
 also fine tuned parallel execution by forcing deeper nodes to be kept in the
 same thread, improving memory locality. These new coordination directives allows
-us to reach linear scalability, as it can be seen from Fig.~\ref{fig:coord}.
+us to improve scalability, as it can be seen from Fig.~\ref{fig:coord}.
+
+%\begin{wrapfigure}[20]{L}{0.45\textwidth}
+\begin{figure}[ht]
+  \begin{center}
+   \includegraphics[width=0.45\textwidth]{figures/coord_min-max-tictactoe}
+\end{center}
+\caption{Scalability and performance gains by using coordination in the MiniMax
+   program. The speedup of the regular and coordinated version is calculated
+   from the sequential execution time of the regular version. The coordinated
+   version with 16 threads is 16 times faster than the regular version without
+   coordination using a single thread.}
+\label{fig:coord}
+\end{figure}
+
+We have experimented with node partitioning in the N Queens program and
+so far the results indicate that, without work stealing, coordination directives
+such as \texttt{set-cpu} improve performance by a factor of two. We have
+yet to see if such directives allows us significant improvements in the presence
+of work stealing.
+
+In terms of implementation, we have improved sharing of coordination
+information between threads. While previous results showed that
+coordinated programs would perform worse when using coordination, we now see
+that they perform better when using multiple threads. Our preliminary
+results are shown in Fig.~\ref{fig:coord_others}.
+
+\begin{figure*}[hb]
+\begin{center}
+  \subfloat[]{\includegraphics[width=0.35\textwidth]{figures/coord_shortest-uspowergrid}}
+  \subfloat[]{\includegraphics[width=0.35\textwidth]{figures/coord_new-heat-transfer-80}}
+\end{center}
+\caption{Scalability and performance gains by using coordination in the Shortest
+Distance and Heat Transfer programs. We have changed our implementation so that
+coordination information is exchanged between threads, thus enabling
+continued performance improvements even when using many threads.}
+\label{fig:coord_others}
+\end{figure*}
 
 \subsection{Improved General Scalability}
 
@@ -209,7 +232,14 @@ memory organization, less thread communication, improved work stealing, improved
 locks and elimination of sequential bottlenecks. We compared the scalability of the
 improved version against the scalability of the old version and the results are
 shown in Fig.~\ref{fig:res1}, Fig.~\ref{fig:res2} and Fig.~\ref{fig:res3}. The
-overall speedup for 16 threads has improved from 9.25 to a 11.75-fold speedup.
+overall speedup for 16 threads has improved from 9.5 to a 11.75-fold speedup.
+The only exception is the 13 Queens problem, where scalability has been reduced
+slightly (Fig.~\ref{fig:res1}). We investigated this issue and have noted that
+a particular optimization for reducing inter-thread communication is the culprit
+of this behavior. The particular optimization buffers all the facts
+that need to be sent to a particular thread instead of sending them one by one as
+soon as they are derived. Because this work well for most programs, we decided to
+use it by default.
 
 \begin{figure*}[h]
 \begin{center}
@@ -242,11 +272,6 @@ overall speedup for 16 threads has improved from 9.25 to a 11.75-fold speedup.
 \label{fig:res3}
 \end{figure*}
 
-We also measured the impact of our new optimizations when executing the programs
-with a single thread. The results presented in Fig.~\ref{fig:seq} indicate
-that the sequential execution speed was preserved for most programs and some
-programs even got slightly faster.
-
 \begin{figure}[b]
 \begin{center}
    \includegraphics[width=0.9\textwidth]{figures/comparison1}
@@ -258,11 +283,17 @@ programs even got slightly faster.
 \label{fig:seq}
 \end{figure}
 
+We also measured the impact of our new optimizations when executing the programs
+with a single thread. The results presented in Fig.~\ref{fig:seq} indicate
+that the sequential execution speed was preserved and some programs even got slightly
+faster.
+
 \subsection{Proofs of Interesting Program Properties}
 
 We are mostly focused on proving that our programs computed the intended result.
 We have proved informally this property for several programs, including
-bipartiteness checking, shortest path, N queens and quick-sort.
+bipartiteness checking, shortest path, N queens and quick-sort~\footnote{Proofs
+available in \url{https://github.com/flavioc/lm-proofs}}.
 The proofs reason about the operational semantics of the language and tend to be
 relatively short.
 
