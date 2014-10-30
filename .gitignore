@@ -1,4 +1,5 @@
 .cm
+.DS_Store
 *~
 *.ps
 *.dvi
@@ -16,5 +17,6 @@ proposal.pdf
 *.tui
 *.top
 *.brf
+proposal_correction/doc.pdf
 *mpgraph.mp
 *.synctex.gz
