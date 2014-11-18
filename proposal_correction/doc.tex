@@ -141,12 +141,15 @@ terms of connections) to the thread's set of owned nodes.
 
 \subsection{Third Major Goal: Proofs of Interesting Program Properties}
 
-We want to take a few programs and show how to prove their correctness and
-termination.  Good candidates include the shortest distance
-algorithm, the quick-sort algorithm, the minimax algorithm and the heat transfer
-algorithm. We are also interested in proving that adding coordination directives
-to some of these programs does not change their correctness proofs and only
-improve the convergence time or scalability.
+
+We want to take a few programs and prove their correctness and
+termination using informal proofs based on the operational semantics of the
+language. Good candidates include the shortest distance algorithm, the
+quick-sort algorithm, the minimax algorithm and the heat transfer algorithm.
+These proofs will provide examples and techniques for future formalization, which
+is beyond the scope of the thesis. We are also interested in proving that
+adding coordination directives to some of these programs does not change their
+correctness proofs and only improve the convergence time or scalability.
 
 \section{New Developments}
 
@@ -290,7 +293,7 @@ faster.
 
 \subsection{Proofs of Interesting Program Properties}
 
-We are mostly focused on proving that our programs computed the intended result.
+We are mostly focused on proving that our programs compute the intended result.
 We have proved informally this property for several programs, including
 bipartiteness checking, shortest path, N queens and quick-sort~\footnote{Proofs
 available in \url{https://github.com/flavioc/lm-proofs}}.
