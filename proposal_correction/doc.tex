@@ -229,20 +229,19 @@ continued performance improvements even when using many threads.}
 
 \subsection{Improved General Scalability}
 
-In order to improve the scalability of our runtime, we made several adjustments
+In order to improve the scalability and performance of our runtime, we made several adjustments
 to the virtual machine. Most of the performance enhancements deal with improved
 memory organization, less thread communication, improved work stealing, improved
-locks and elimination of sequential bottlenecks. We compared the scalability of the
-improved version against the scalability of the old version and the results are
-shown in Fig.~\ref{fig:res1}, Fig.~\ref{fig:res2} and Fig.~\ref{fig:res3}. The
-overall speedup for 16 threads has improved from 9.5 to a 11.75-fold speedup.
-The only exception is the 13 Queens problem, where scalability has been reduced
-slightly (Fig.~\ref{fig:res1}). We investigated this issue and have noted that
-a particular optimization for reducing inter-thread communication is the culprit
-of this behavior. The particular optimization buffers all the facts
-that need to be sent to a particular thread instead of sending them one by one as
-soon as they are derived. Because this work well for most programs, we decided to
-use it by default.
+compilation, improved locks and elimination of sequential bottlenecks. We
+compared the scalability of the improved version against the scalability of the
+old version and the results are shown in Fig.~\ref{fig:res1},
+Fig.~\ref{fig:res2}, Fig.~\ref{fig:res3} and Fig.~\ref{fig:res4}. For
+Fig.~\ref{fig:res2} and~\ref{fig:res3} we measured the execution time of a
+hand-optimized sequential C++ version of each algorithm and used that as the
+baseline for the plots. The baseline for Fig.~\ref{fig:res1}
+and~\ref{fig:res2} is the execution time of the corresponding Linear Meld
+program using 1 thread. All programs showed a scalability improvement, with the
+exception of Greedy Graph Coloring.
 
 \begin{figure*}[h]
 \begin{center}
@@ -260,7 +259,7 @@ use it by default.
 \end{center}
 \caption{New experimental results for Greedy Graph Coloring. The baseline used
    is Linear Meld with 1 thread.}
-\label{fig:res1}
+\label{fig:res2}
 \end{figure*}
 
 \begin{figure*}[h]
@@ -271,7 +270,7 @@ use it by default.
 \caption{New experimental results for Single Source Shortest Distance and N
    Queens. The baseline used is a hand-optimized sequential C++ version of each
    program.}
-\label{fig:res2}
+\label{fig:res3}
 \end{figure*}
 
 \begin{figure*}[h]
@@ -285,7 +284,7 @@ use it by default.
 \caption{New experimental results for Heat Transfer, MiniMax and Belief
    Propagation. The baseline used is a hand-optimized sequential C++ version of
    each program.}
-\label{fig:res3}
+\label{fig:res4}
 \end{figure*}
 
 \begin{figure}[b]
